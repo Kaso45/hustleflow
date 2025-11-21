@@ -1,2 +1,6 @@
 # hustleflow
-AI-powered staff management web application
+
+## Requirements
+
+- Spring Boot: 3.5.8
+- Java: 21
