@@ -22,8 +22,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // Mở API Auth
-                .anyRequest().authenticated()
+                        .anyRequest().permitAll() // Cho phép tất cả requests cho demo
                 );
         return http.build();
     }

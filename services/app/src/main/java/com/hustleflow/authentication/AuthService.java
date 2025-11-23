@@ -2,6 +2,8 @@ package com.hustleflow.authentication;
 
 import com.hustleflow.authentication.dto.*;
 import com.hustleflow.core.security.JwtUtil;
+import com.hustleflow.exception.BadRequestException;
+import com.hustleflow.exception.ResourceNotFoundException;
 import com.hustleflow.user.User;
 import com.hustleflow.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,7 @@ public class AuthService {
     public RegisterResponse register(RegisterRequest request) {
         // Check trùng username
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new BadRequestException("Username already exists");
         }
 
         // Tạo User Account
@@ -35,10 +37,10 @@ public class AuthService {
 
     public LoginResponse login(LoginRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new BadRequestException("Invalid credentials");
         }
 
         String token = jwtUtil.generateToken(user.getUsername());
