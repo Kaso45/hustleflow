@@ -1,13 +1,14 @@
 package com.hustleflow.contract.dto;
 
-import com.hustleflow.contract.ContractStatus;
-import com.hustleflow.contract.ContractType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+
+import com.hustleflow.contract.enums.ContractStatus;
+import com.hustleflow.contract.enums.ContractType;
 
 @Data
 @AllArgsConstructor
@@ -22,4 +23,3 @@ public class ContractResponse {
     private ContractStatus status;
     private String fileUrl;
 }
-
