@@ -1,7 +1,7 @@
-package hustle.employee_management1.service;
+package com.hustleflow.employee.service;
 
-import hustle.employee_management1.model.Employee;
-import hustle.employee_management1.repository.EmployeeRepository;
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +39,7 @@ public class EmployeeService {
         }
         return null;
     }
+
     public void deleteEmployee(Long id) {
         employeeRepository.deleteById(id);
     }

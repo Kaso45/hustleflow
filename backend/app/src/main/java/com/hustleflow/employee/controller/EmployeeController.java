@@ -1,9 +1,10 @@
-package hustle.employee_management1.controller;
+package com.hustleflow.employee.controller;
 
-import hustle.employee_management1.model.Employee;
-import hustle.employee_management1.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.service.EmployeeService;
 
 import java.util.List;
 

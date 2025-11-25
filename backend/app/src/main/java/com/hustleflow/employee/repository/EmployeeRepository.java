@@ -1,8 +1,9 @@
-package hustle.employee_management1.repository;
+package com.hustleflow.employee.repository;
 
-import hustle.employee_management1.model.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
+import com.hustleflow.employee.domain.Employee;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
