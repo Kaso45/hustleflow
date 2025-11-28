@@ -35,6 +35,7 @@ public class EmployeeService {
             employee.setAge(employeeDetails.getAge());
             employee.setJobTitle(employeeDetails.getJobTitle());
             employee.setHireDate(employeeDetails.getHireDate());
+            employee.setDepartmentCode(employeeDetails.getDepartmentCode());
             return employeeRepository.save(employee);
         }
         return null;
