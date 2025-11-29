@@ -23,9 +23,7 @@ public class TaskCreateRequest {
 
     private LocalDateTime deadline;
 
-    // cho phép null, service sẽ set default "MEDIUM"
     private String priority;
 
-    // cho phép null, service sẽ set default "TODO"
     private String status;
 }
