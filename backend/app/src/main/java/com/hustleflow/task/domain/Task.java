@@ -18,7 +18,6 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // tạm coi projectId & assigneeId là Long
     @Column(name = "project_id", nullable = false)
     private Long projectId;
 
@@ -33,11 +32,9 @@ public class Task {
 
     private LocalDateTime deadline;
 
-    // String: "LOW", "MEDIUM", "HIGH"
     @Column(nullable = false, length = 20)
     private String priority;
 
-    // String: "TODO", "IN_PROGRESS", "DONE"
     @Column(nullable = false, length = 20)
     private String status;
 

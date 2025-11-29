@@ -9,8 +9,10 @@ import com.hustleflow.task.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +48,15 @@ public class TaskServiceImpl implements TaskService {
 
         Task saved = taskRepository.save(task);
         return mapToResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TaskResponse> getAllTasks() {
+        return taskRepository.findAll()
+                .stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

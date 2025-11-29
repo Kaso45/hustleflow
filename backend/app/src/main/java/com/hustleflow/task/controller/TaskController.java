@@ -19,7 +19,6 @@ public class TaskController {
 
     private final TaskService taskService;
 
-    // POST /api/tasks
     @PostMapping
     public ResponseEntity<TaskResponse> createTask(
             @Valid @RequestBody TaskCreateRequest request) {
@@ -27,7 +26,6 @@ public class TaskController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // GET /api/tasks?projectId=...&assigneeId=...&status=IN_PROGRESS
     @GetMapping
     public List<TaskResponse> getTasks(
             @RequestParam(required = false) Long projectId,
@@ -36,7 +34,11 @@ public class TaskController {
         return taskService.getTasks(projectId, assigneeId, status);
     }
 
-    // PATCH /api/tasks/{taskId}
+    @GetMapping("/all")
+    public List<TaskResponse> getAllTasks() {
+        return taskService.getAllTasks();
+    }
+
     @PatchMapping("/{taskId}")
     public TaskResponse updateTaskStatus(
             @PathVariable Long taskId,
