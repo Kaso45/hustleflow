@@ -18,11 +18,9 @@ public class LeaveRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // trong API
     @Column(name = "employee_id", nullable = false)
     private Long employeeId;
 
-    // "ANNUAL", "SICK", "UNPAID" (string)
     @Column(name = "leave_type", nullable = false, length = 20)
     private String leaveType;
 
@@ -35,10 +33,9 @@ public class LeaveRequest {
     @Column(columnDefinition = "text")
     private String reason;
 
-    // "PENDING", "APPROVED", "REJECTED"
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Column(nullable = false)
+    private String status = "PENDING";
 
-    @Column(name = "manager_comment", columnDefinition = "text")
+    @Column(name = "manager_comment")
     private String managerComment;
 }
