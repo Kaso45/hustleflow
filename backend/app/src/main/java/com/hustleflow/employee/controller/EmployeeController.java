@@ -1,10 +1,10 @@
 package com.hustleflow.employee.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.domain.EmployeeRequest;
+import com.hustleflow.employee.domain.EmployeeResponse;
 import com.hustleflow.employee.service.EmployeeService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -12,31 +12,65 @@ import java.util.List;
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
-    @Autowired
-    private EmployeeService employeeService;
+    private final EmployeeService service;
 
+    public EmployeeController(EmployeeService service) {
+        this.service = service;
+    }
+
+    // GET /api/employees
     @GetMapping
-    public List<Employee> getAllEmployees() {
-        return employeeService.getAllEmployees();
+    public List<EmployeeResponse> getAll() {
+        return service.getAll();
+    }
+
+    @GetMapping("/{employeeId}")
+    public ResponseEntity<EmployeeResponse> getById(@PathVariable Long employeeId) {
+        EmployeeResponse res = service.getById(employeeId);
+        if (res == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(res);
     }
 
     @PostMapping
-    public Employee createEmployee(@RequestBody Employee employee) {
-        return employeeService.createEmployee(employee);
+    public ResponseEntity<CreateEmployeeResponse> create(@RequestBody EmployeeRequest req) {
+        Long id = service.create(req);
+        return ResponseEntity.ok(new CreateEmployeeResponse("Create employee successfully", id));
     }
 
-    @GetMapping("/{id}")
-    public Employee getEmployeeById(@PathVariable Long id) {
-        return employeeService.getEmployeeById(id);
+    @PutMapping("/{employeeId}")
+    public ResponseEntity<EmployeeResponse> update(
+            @PathVariable Long employeeId,
+            @RequestBody EmployeeRequest req) {
+        EmployeeResponse res = service.update(employeeId, req);
+        if (res == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(res);
     }
 
-    @PutMapping("/{id}")
-    public Employee updateEmployee(@PathVariable Long id, @RequestBody Employee employeeDetails) {
-        return employeeService.updateEmployee(id, employeeDetails);
+    @DeleteMapping("/{employeeId}")
+    public ResponseEntity<Void> delete(@PathVariable Long employeeId) {
+        service.delete(employeeId);
+        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}")
-    public void deleteEmployee(@PathVariable Long id) {
-        employeeService.deleteEmployee(id);
+    static class CreateEmployeeResponse {
+        private final String message;
+        private final Long employeeId;
+
+        public CreateEmployeeResponse(String message, Long employeeId) {
+            this.message = message;
+            this.employeeId = employeeId;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public Long getEmployeeId() {
+            return employeeId;
+        }
     }
 }
