@@ -8,7 +8,7 @@ import java.util.List;
 public class GeneratePayrollRequest {
     private int month;
     private int year;
-    private boolean applyAll;
-    private List<String> departmentNames;
+    private List<String> departmentCodes; // null or empty means all departments
+    private boolean applyToAllDepartments;
 }
 

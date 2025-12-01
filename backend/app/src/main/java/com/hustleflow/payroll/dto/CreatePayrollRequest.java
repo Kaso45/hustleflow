@@ -14,7 +14,6 @@ public class CreatePayrollRequest {
     private BigDecimal baseSalary;
     private BigDecimal bonus;
     private BigDecimal deduction;
-    private BigDecimal netSalary;
     private PayrollStatus status;
 }
 

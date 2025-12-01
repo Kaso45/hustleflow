@@ -3,12 +3,14 @@ package com.hustleflow.payroll.dto;
 import com.hustleflow.payroll.enums.PayrollStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PayrollResponse {
     private Long id;
     private Long employeeId;

@@ -23,6 +23,7 @@ public class PayrollController {
 
     private final PayrollService payrollService;
 
+    // Lấy danh sách payroll: GET /api/payrolls
     @GetMapping
     public ResponseEntity<List<PayrollResponse>> getPayrolls(
             @RequestParam(required = false) Integer month,
@@ -31,12 +32,13 @@ public class PayrollController {
         return ResponseEntity.ok(payrollService.getPayrolls(month, year, status));
     }
 
+    // Tạo payroll mới: POST /api/payrolls
     @PostMapping
     public ResponseEntity<PayrollResponse> createPayroll(@RequestBody CreatePayrollRequest request) {
         return ResponseEntity.ok(payrollService.createPayroll(request));
     }
     
-    // API for generating payrolls
+    // Generate payrolls: POST /api/payrolls/generate
     @PostMapping("/generate")
     public ResponseEntity<List<PayrollResponse>> generatePayrolls(@RequestBody GeneratePayrollRequest request) {
         return ResponseEntity.ok(payrollService.generatePayrolls(request));
