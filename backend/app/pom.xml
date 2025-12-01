@@ -11,8 +11,8 @@
     <groupId>com.hustleflow</groupId>
     <artifactId>hustleflow-app</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>demo</name>
-    <description>Demo project for Spring Boot</description>
+    <name>hustleflow</name>
+    <description>AI-powered staff management web application</description>
     <url/>
     <licenses>
         <license/>
