@@ -10,7 +10,7 @@
         <v-card class="pa-4">
           <div class="text-subtitle-1">Total Employees</div>
           <div class="text-h5 font-weight-bold">--</div>
-        </v-card>
+        </v-card> 
       </v-col>
       <v-col cols="12" md="3">
         <v-card class="pa-4">
@@ -30,7 +30,7 @@
           <div class="text-h5 font-weight-bold">--</div>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row>W
 
     <v-row class="mt-4" dense>
       <v-col cols="12" md="6">
