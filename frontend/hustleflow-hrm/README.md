@@ -18,16 +18,20 @@ cd hustleflow-hrm
 ### 2. Install dependencies 
 npm install
 
+
 ### 3. Install Vue Router, Axios, Vuetify and vite-plugin-vuetify
 npm install vue-router@4 axios
 npm install vuetify@3 vite-plugin-vuetify
 npm install sass sass-loader -D
+npm install vue-i18n@9
 
 ### ▶️ Development Server
 
 Run the app in development mode:
 
 npm run dev
+
+
 
 ```sh
 
