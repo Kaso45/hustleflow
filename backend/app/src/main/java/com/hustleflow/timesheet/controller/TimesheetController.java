@@ -26,37 +26,19 @@ public class TimesheetController {
 
     @PostMapping("/clock-in")
     public ResponseEntity<?> checkIn(@RequestBody CheckInRequest request) {
-
-        try {
-            return ResponseEntity.ok(timesheetService.createTimesheet(request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+        return ResponseEntity.ok(timesheetService.createTimesheet(request));
     }
 
     @PatchMapping("/clock-out")
     public ResponseEntity<?> clockOut(@RequestBody ClockOutRequest request) {
-
-        try {
-            return ResponseEntity.ok(timesheetService.updateTimesheet(request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+        return ResponseEntity.ok(timesheetService.updateTimesheet(request));
     }
 
     @GetMapping("")
     public ResponseEntity<?> getTimesheetHistory(@RequestParam Long employeeId,
             @RequestParam(required = false) String month,
             @RequestParam(required = false) String year) {
-
-        try {
-            return ResponseEntity.ok(timesheetService.getTimesheetHistory(employeeId, month, year));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+        return ResponseEntity.ok(timesheetService.getTimesheetHistory(employeeId, month, year));
     }
 
 }
