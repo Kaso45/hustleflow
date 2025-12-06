@@ -11,9 +11,7 @@ import com.hustleflow.timesheet.domain.Timesheet;
 
 @Repository
 public interface TimesheetRepository extends JpaRepository<Timesheet, Long> {
-
     public List<Timesheet> findByEmployeeAndDateBetween(Employee employee, LocalDateTime start, LocalDateTime end);
 
     public List<Timesheet> findByEmployee(Employee employee);
-
 }
