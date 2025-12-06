@@ -1,15 +1,14 @@
 package com.hustleflow.employee.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import com.hustleflow.employee.domain.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-@Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+    List<Employee> findByEmpDepartment(String empDepartment);
 
-    List<Employee> findByDepartmentCodeIn(List<String> departmentCodes);
+    List<Employee> findByGender(String gender);
 
+    List<Employee> findByAttrition(Boolean attrition);
 }
