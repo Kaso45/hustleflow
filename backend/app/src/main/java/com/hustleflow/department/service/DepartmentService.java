@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import com.hustleflow.department.domain.Department;
 import com.hustleflow.department.dto.request.DepartmentRequestDTO;
 import com.hustleflow.department.repository.DepartmentRepository;
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.repository.EmployeeRepository;
 
 @Service
 public class DepartmentService {
@@ -17,9 +19,11 @@ public class DepartmentService {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     private DepartmentRepository departmentRepository;
+    private EmployeeRepository employeeRepository;
 
-    public DepartmentService(DepartmentRepository departmentRepository) {
+    public DepartmentService(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
         this.departmentRepository = departmentRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public List<Department> getDepartments() {
@@ -27,6 +31,8 @@ public class DepartmentService {
     }
 
     public String createDepartment(DepartmentRequestDTO request) {
+        Employee manager = employeeRepository.findById(request.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Manager doesn't exist: " + request.getManagerId()));
         Optional<Department> existing = departmentRepository.findByDepartmentName(request.getDepartmentName());
         existing.ifPresent(obj -> {
             throw new RuntimeException("Department already exists: " + obj.getDepartmentName());
@@ -36,7 +42,7 @@ public class DepartmentService {
                 .departmentName(request.getDepartmentName())
                 .code(request.getCode())
                 .description(request.getDescription())
-                .managerId(request.getManagerId())
+                .manager(manager)
                 .build();
 
         departmentRepository.save(newDepartment);
@@ -47,13 +53,15 @@ public class DepartmentService {
     }
 
     public String updateDepartment(Long id, DepartmentRequestDTO request) {
+        Employee manager = employeeRepository.findById(request.getManagerId())
+                .orElseThrow(() -> new RuntimeException("Manager doesn't exist: " + request.getManagerId()));
         Department existing = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department doesn't exist: " + id));
 
         existing.setDepartmentName(request.getDepartmentName());
         existing.setCode(request.getCode());
         existing.setDescription(request.getDescription());
-        existing.setManagerId(request.getManagerId());
+        existing.setManager(manager);
 
         departmentRepository.save(existing);
 

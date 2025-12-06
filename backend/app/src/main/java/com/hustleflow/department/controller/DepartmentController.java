@@ -28,47 +28,24 @@ public class DepartmentController {
     }
 
     @GetMapping("")
-    public ResponseEntity<?> getDepartments() {
-        try {
-            List<Department> departments = departmentService.getDepartments();
-            return ResponseEntity.ok(departments);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+    public ResponseEntity<List<Department>> getDepartments() {
+        List<Department> departments = departmentService.getDepartments();
+        return ResponseEntity.ok(departments);
     }
 
     @PostMapping("")
-    public ResponseEntity<?> createDepartment(@RequestBody DepartmentRequestDTO request) {
-
-        try {
-            return ResponseEntity.ok(departmentService.createDepartment(request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+    public ResponseEntity<String> createDepartment(@RequestBody DepartmentRequestDTO request) {
+        return ResponseEntity.ok(departmentService.createDepartment(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateDepartment(@PathVariable Long id, @RequestBody DepartmentRequestDTO request) {
-
-        try {
-            return ResponseEntity.ok(departmentService.updateDepartment(id, request));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+    public ResponseEntity<String> updateDepartment(@PathVariable Long id, @RequestBody DepartmentRequestDTO request) {
+        return ResponseEntity.ok(departmentService.updateDepartment(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDepartment(@PathVariable Long id) {
-
-        try {
-            return ResponseEntity.ok(departmentService.deleteDepartment(id));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-
+    public ResponseEntity<String> deleteDepartment(@PathVariable Long id) {
+        return ResponseEntity.ok(departmentService.deleteDepartment(id));
     }
 
 }
