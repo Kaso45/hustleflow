@@ -19,7 +19,7 @@ public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long empNumber;
+    private Long id;
 
     @Column(name = "emp_department", nullable = false)
     private String empDepartment;

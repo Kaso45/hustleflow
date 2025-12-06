@@ -114,7 +114,7 @@ public class EmployeeService {
 
     private EmployeeResponse mapToResponse(Employee employee) {
         EmployeeResponse response = new EmployeeResponse();
-        response.setEmpNumber(employee.getEmpNumber());
+        response.setEmpNumber(employee.getId());
         response.setEmpDepartment(employee.getEmpDepartment());
         response.setGender(employee.getGender());
         response.setAge(employee.getAge());
