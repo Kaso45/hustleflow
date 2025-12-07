@@ -75,7 +75,7 @@ public class PayrollService {
             request.getDepartmentCodes().isEmpty()) {
             employees = employeeRepository.findAll();
         } else {
-            employees = employeeRepository.findByDepartmentCodeIn(request.getDepartmentCodes());
+            employees = employeeRepository.findByEmpDepartmentIn(request.getDepartmentCodes());
         }
 
         return employees.stream()
@@ -106,7 +106,7 @@ public class PayrollService {
 
         Payroll payroll = new Payroll();
         payroll.setEmployeeId(employee.getId());
-        payroll.setDepartmentCode(employee.getDepartmentCode());
+        payroll.setDepartmentCode(employee.getEmpDepartment()); // Map empDepartment to departmentCode
         payroll.setMonth(month);
         payroll.setYear(year);
         
