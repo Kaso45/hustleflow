@@ -33,7 +33,7 @@ public class Department {
     private String description;
 
     @OneToOne
-    @JoinColumn(name = "manager_id", referencedColumnName = "employee_id")
+    @JoinColumn(name = "manager_id", referencedColumnName = "id")
     private Employee manager;
 
 }
