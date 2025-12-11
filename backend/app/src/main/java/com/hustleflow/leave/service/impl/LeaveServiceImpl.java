@@ -1,9 +1,14 @@
 package com.hustleflow.leave.service.impl;
 
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.repository.EmployeeRepository;
+import com.hustleflow.exception.ResourceNotFoundException;
 import com.hustleflow.leave.domain.LeaveRequest;
 import com.hustleflow.leave.dto.LeaveCreateRequest;
 import com.hustleflow.leave.dto.LeaveResponse;
 import com.hustleflow.leave.dto.LeaveStatusUpdateRequest;
+import com.hustleflow.leave.enums.LeaveStatus;
+import com.hustleflow.leave.enums.LeaveType;
 import com.hustleflow.leave.repository.LeaveRequestRepository;
 import com.hustleflow.leave.service.LeaveService;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +25,23 @@ public class LeaveServiceImpl implements LeaveService {
 
     private final LeaveRequestRepository leaveRepository;
 
+    private final EmployeeRepository employeeRepository;
+
     @Override
     public LeaveResponse createLeaveRequest(LeaveCreateRequest leaveRequest) {
         LeaveRequest leave = new LeaveRequest();
-        leave.setEmployeeId(leaveRequest.getEmployeeId());
-        leave.setLeaveType(leaveRequest.getLeaveType());
+
+        Employee employee = employeeRepository.findById(leaveRequest.getEmployeeId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Employee not found: " + leaveRequest.getEmployeeId()));
+
+        LeaveType leaveType = LeaveType.valueOf(leaveRequest.getLeaveType().toUpperCase());
+
+        leave.setEmployee(employee);
+        leave.setLeaveType(leaveType);
         leave.setStartDate(leaveRequest.getStartDate());
         leave.setEndDate(leaveRequest.getEndDate());
         leave.setReason(leaveRequest.getReason());
-        leave.setStatus(leaveRequest.getStatus());
         LeaveRequest savedLeave = leaveRepository.save(leave);
         return mapToResponse(savedLeave);
     }
@@ -36,22 +49,29 @@ public class LeaveServiceImpl implements LeaveService {
     @Override
     public LeaveResponse updateLeaveStatus(Long leaveId, LeaveStatusUpdateRequest request) {
         LeaveRequest leave = leaveRepository.findById(leaveId)
-                .orElseThrow(() -> new RuntimeException("Leave not found with id: " + leaveId));
+                .orElseThrow(() -> new ResourceNotFoundException("Leave not found with id: " + leaveId));
 
-        leave.setStatus(request.getStatus());
+        LeaveStatus leaveStatus = LeaveStatus.valueOf(request.getStatus().toUpperCase());
+
+        leave.setStatus(leaveStatus);
         leave.setManagerComment(request.getManagerComment());
         LeaveRequest savedLeave = leaveRepository.save(leave);
         return mapToResponse(savedLeave);
     }
 
     public List<LeaveResponse> getLeaves(Long employeeId, String status) {
+        LeaveStatus leaveStatus = null;
+        if (status != null && !status.isBlank()) {
+            leaveStatus = LeaveStatus.valueOf(status.toUpperCase());
+        }
+
         List<LeaveRequest> leaves;
-        if (employeeId != null && status != null) {
-            leaves = leaveRepository.findByEmployeeIdAndStatus(employeeId, status);
+        if (employeeId != null && leaveStatus != null) {
+            leaves = leaveRepository.findByEmployee_IdAndStatus(employeeId, leaveStatus);
         } else if (employeeId != null) {
-            leaves = leaveRepository.findByEmployeeId(employeeId);
-        } else if (status != null) {
-            leaves = leaveRepository.findByStatus(status);
+            leaves = leaveRepository.findByEmployee_Id(employeeId);
+        } else if (leaveStatus != null) {
+            leaves = leaveRepository.findByStatus(leaveStatus);
         } else {
             leaves = leaveRepository.findAll();
         }
@@ -63,7 +83,7 @@ public class LeaveServiceImpl implements LeaveService {
     private LeaveResponse mapToResponse(LeaveRequest leave) {
         LeaveResponse res = new LeaveResponse();
         res.setId(leave.getId());
-        res.setEmployeeId(leave.getEmployeeId());
+        res.setEmployeeId(leave.getEmployee().getId());
         res.setLeaveType(leave.getLeaveType());
         res.setStartDate(leave.getStartDate());
         res.setEndDate(leave.getEndDate());
