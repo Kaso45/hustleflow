@@ -1,7 +1,24 @@
-import apiClient from './apiClient'
+// src/services/employeeService.js
+import apiClient from './apiClient';
 
-// Skeleton service, sau này bạn gọi ở PeopleEmployeesPage
-export async function fetchEmployees() {
-  const res = await apiClient.get('/employees')
-  return res.data
-}
+export const getEmployees = (params = {}) => {
+  // params: optional query params (e.g., ?page=...&department=...)
+  return apiClient.get('/employees', { params });
+};
+
+export const getEmployeeById = (id) => {
+  return apiClient.get(`/employees/${id}`);
+};
+
+export const createEmployee = (employeeData) => {
+  // employeeData should follow defaultEmployee keys (see src/models/employeeModel.js)
+  return apiClient.post('/employees', employeeData);
+};
+
+export const updateEmployee = (id, employeeData) => {
+  return apiClient.put(`/employees/${id}`, employeeData);
+};
+
+export const deleteEmployee = (id) => {
+  return apiClient.delete(`/employees/${id}`);
+};

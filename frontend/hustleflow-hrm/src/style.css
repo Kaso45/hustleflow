@@ -11,6 +11,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+   --bg-soft: #fbfdff;
+  --card-bg: #ffffff;
+  --neo-blue: #3b82f6;
+  --neo-purple: #8b5cf6;
 }
 
 a {
@@ -69,6 +73,10 @@ button:focus-visible {
   :root {
     color: #213547;
     background-color: #ffffff;
+     --bg-soft: #fbfdff;
+  --card-bg: #ffffff;
+  --neo-blue: #3b82f6;
+  --neo-purple: #8b5cf6;
   }
   a:hover {
     color: #747bff;
@@ -76,4 +84,17 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+.dashboard-wrapper {
+  background: var(--bg-soft); /* trắng tinh tế */
+  min-height: 100vh;
+  padding: 28px;
+}
+
+/* grid for summary */
+.summary-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
 }

@@ -12,12 +12,13 @@
 
 <script setup>
 import { useRouter } from 'vue-router'
-import { clearToken } from '../../store/authStore'
+import { useAuthStore } from '../../store/authStore'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 function handleLogout() {
-  clearToken()
+  authStore.logout()       // 🔥 gọi đúng action logout trong Pinia
   router.push({ name: 'Login' })
 }
 </script>

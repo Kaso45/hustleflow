@@ -1,0 +1,25 @@
+/* Hologram Glass Card + Grain */
+.holo-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.22);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.08),
+    inset 0 0 22px rgba(255,255,255,0.12);
+}
+
+/* Noise overlay layer */
+.holo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('@/assets/noise.png');
+  mix-blend-mode: overlay;
+  opacity: 0.12;
+  pointer-events: none;
+  border-radius: inherit;
+}
