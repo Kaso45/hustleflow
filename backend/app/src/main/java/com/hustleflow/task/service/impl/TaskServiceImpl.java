@@ -1,70 +1,67 @@
 package com.hustleflow.task.service.impl;
 
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.repository.EmployeeRepository;
+import com.hustleflow.exception.ResourceNotFoundException;
+import com.hustleflow.project.domain.Project;
+import com.hustleflow.project.repository.ProjectRepository;
 import com.hustleflow.task.domain.Task;
 import com.hustleflow.task.dto.TaskCreateRequest;
 import com.hustleflow.task.dto.TaskResponse;
 import com.hustleflow.task.dto.TaskStatusUpdateRequest;
+import com.hustleflow.task.enums.TaskPriority;
+import com.hustleflow.task.enums.TaskStatus;
 import com.hustleflow.task.repository.TaskRepository;
 import com.hustleflow.task.service.TaskService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class TaskServiceImpl implements TaskService {
 
     private final TaskRepository taskRepository;
+    private final ProjectRepository projectRepository;
+    private final EmployeeRepository employeeRepository;
 
     @Override
+    @Transactional
     public TaskResponse createTask(TaskCreateRequest request) {
-        // default priority/status nếu client không gửi
-        String priority = request.getPriority();
-        if (priority == null || priority.isBlank()) {
-            priority = "MEDIUM";
-        }
-        priority = priority.toUpperCase();
+        TaskPriority priority = TaskPriority.valueOf(request.getPriority().toUpperCase());
+        TaskStatus status = TaskStatus.valueOf(request.getStatus().toUpperCase());
 
-        String status = request.getStatus();
-        if (status == null || status.isBlank()) {
-            status = "TODO";
-        }
-        status = status.toUpperCase();
+        Project project = projectRepository.findById(request.getProjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found: " + request.getProjectId()));
 
-        Task task = Task.builder()
-                .projectId(request.getProjectId())
-                .assigneeId(request.getAssigneeId())
+        Employee employee = employeeRepository.findById(request.getAssigneeId())
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found: " + request.getAssigneeId()));
+
+        var taskBuilder = Task.builder()
+                .project(project)
+                .assignee(employee)
                 .title(request.getTitle())
                 .description(request.getDescription())
                 .deadline(request.getDeadline())
-                .priority(priority)
-                .status(status)
-                .build();
+                .priority(priority);
 
-        Task saved = taskRepository.save(task);
+        if (status != null) {
+            taskBuilder.status(status);
+        }
+
+        Task saved = taskRepository.save(taskBuilder.build());
+
         return mapToResponse(saved);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<TaskResponse> getAllTasks() {
-        return taskRepository.findAll()
-                .stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    @Transactional(readOnly = true)
     public List<TaskResponse> getTasks(Long projectId, Long assigneeId, String status) {
-        String normalizedStatus = null;
-        if (status != null && !status.isBlank()) {
-            normalizedStatus = status.toUpperCase();
+        TaskStatus normalizedStatus = null;
+        if (status != null) {
+            normalizedStatus = TaskStatus.valueOf(status);
         }
 
         return taskRepository.searchTasks(projectId, assigneeId, normalizedStatus)
@@ -74,12 +71,15 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    @Transactional
     public TaskResponse updateTaskStatus(Long taskId, TaskStatusUpdateRequest request) {
         Task task = taskRepository.findById(taskId)
-                .orElseThrow(() -> new RuntimeException("Task not found with id: " + taskId));
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with id: " + taskId));
 
-        String newStatus = request.getStatus();
-        task.setStatus(newStatus.toUpperCase());
+        TaskStatus newStatus = TaskStatus.valueOf(request.getStatus().toUpperCase());
+        if (newStatus != null) {
+            task.setStatus(newStatus);
+        }
 
         if (request.getCompletionNote() != null) {
             task.setCompletionNote(request.getCompletionNote());
@@ -92,13 +92,13 @@ public class TaskServiceImpl implements TaskService {
     private TaskResponse mapToResponse(Task task) {
         TaskResponse res = new TaskResponse();
         res.setId(task.getId());
-        res.setProjectId(task.getProjectId());
-        res.setAssigneeId(task.getAssigneeId());
+        res.setProjectId(task.getProject().getId());
+        res.setAssigneeId(task.getAssignee().getId());
         res.setTitle(task.getTitle());
         res.setDescription(task.getDescription());
         res.setDeadline(task.getDeadline());
-        res.setPriority(task.getPriority());
-        res.setStatus(task.getStatus());
+        res.setPriority(String.valueOf(task.getPriority()));
+        res.setStatus(String.valueOf(task.getStatus()));
         res.setCompletionNote(task.getCompletionNote());
         return res;
     }

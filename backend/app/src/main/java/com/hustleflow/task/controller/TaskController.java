@@ -34,11 +34,6 @@ public class TaskController {
         return taskService.getTasks(projectId, assigneeId, status);
     }
 
-    @GetMapping("/all")
-    public List<TaskResponse> getAllTasks() {
-        return taskService.getAllTasks();
-    }
-
     @PatchMapping("/{taskId}")
     public TaskResponse updateTaskStatus(
             @PathVariable Long taskId,
