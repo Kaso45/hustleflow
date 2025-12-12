@@ -6,6 +6,8 @@ import com.hustleflow.contract.dto.CreateContractRequest;
 import com.hustleflow.contract.dto.UpdateContractRequest;
 import com.hustleflow.contract.enums.ContractStatus;
 import com.hustleflow.contract.repository.ContractRepository;
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.employee.repository.EmployeeRepository;
 import com.hustleflow.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class ContractService {
 
     private final ContractRepository contractRepository;
+    private final EmployeeRepository employeeRepository;
 
     public List<ContractResponse> getAllContracts() {
         return contractRepository.findAll().stream()
@@ -27,7 +30,11 @@ public class ContractService {
 
     public ContractResponse createContract(CreateContractRequest request) {
         Contract contract = new Contract();
-        contract.setEmployeeId(request.getEmployeeId());
+
+        Employee employee = employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found: " + request.getEmployeeId()));
+
+        contract.setEmployee(employee);
         contract.setContractType(request.getContractType());
         contract.setStartDate(request.getStartDate());
         contract.setEndDate(request.getEndDate());
@@ -60,7 +67,7 @@ public class ContractService {
     private ContractResponse mapToResponse(Contract contract) {
         return new ContractResponse(
                 contract.getId(),
-                contract.getEmployeeId(),
+                contract.getEmployee().getId(),
                 contract.getContractType(),
                 contract.getStartDate(),
                 contract.getEndDate(),
