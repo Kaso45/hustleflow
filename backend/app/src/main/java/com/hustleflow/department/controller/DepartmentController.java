@@ -3,8 +3,8 @@ package com.hustleflow.department.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.hustleflow.department.domain.Department;
 import com.hustleflow.department.dto.request.DepartmentRequestDTO;
+import com.hustleflow.department.dto.response.DeparmentResponseDTO;
 import com.hustleflow.department.service.DepartmentService;
 
 import java.util.List;
@@ -28,8 +28,8 @@ public class DepartmentController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Department>> getDepartments() {
-        List<Department> departments = departmentService.getDepartments();
+    public ResponseEntity<List<DeparmentResponseDTO>> getDepartments() {
+        List<DeparmentResponseDTO> departments = departmentService.getDepartments();
         return ResponseEntity.ok(departments);
     }
 

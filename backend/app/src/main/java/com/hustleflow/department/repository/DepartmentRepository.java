@@ -11,5 +11,8 @@ import com.hustleflow.department.domain.Department;
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Long> {
     Optional<Department> findByDepartmentName(String departmentName);
+
+    Optional<Department> findByCode(String code);
+
     List<Department> findByDepartmentNameIn(List<String> departmentNames);
 }
