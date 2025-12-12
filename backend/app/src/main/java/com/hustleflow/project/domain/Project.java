@@ -1,5 +1,6 @@
 package com.hustleflow.project.domain;
 
+import com.hustleflow.employee.domain.Employee;
 import com.hustleflow.project.enums.ProjectStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -29,7 +30,7 @@ public class Project {
     @Column(nullable = false)
     private ProjectStatus status;
 
-    @Column(nullable = false)
-    private Long managerId;
+    @ManyToOne
+    @JoinColumn(name = "manager_id", referencedColumnName = "id")
+    private Employee manager;
 }
-
