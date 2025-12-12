@@ -1,9 +1,13 @@
 package com.hustleflow.employee.service;
 
+import com.hustleflow.department.domain.Department;
+import com.hustleflow.department.repository.DepartmentRepository;
 import com.hustleflow.employee.domain.Employee;
 import com.hustleflow.employee.dto.EmployeeCreateRequest;
 import com.hustleflow.employee.dto.EmployeeResponse;
 import com.hustleflow.employee.repository.EmployeeRepository;
+import com.hustleflow.exception.ResourceNotFoundException;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,14 +17,21 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
+    @Transactional
     public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
         Employee employee = new Employee();
-        employee.setEmpDepartment(request.getEmpDepartment());
+
+        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
+
+        employee.setEmpDepartment(department);
+        employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
         employee.setEducationBackground(request.getEducationBackground());
@@ -53,10 +64,10 @@ public class EmployeeService {
         return mapToResponse(savedEmployee);
     }
 
-    public List<EmployeeResponse> getEmployees(String department, String position, Boolean resigned) {
+    public List<EmployeeResponse> getEmployees(String departmentName) {
         List<Employee> employees;
-        if (department != null && position != null) {
-            employees = employeeRepository.findByEmpDepartment(department);
+        if (departmentName != null) {
+            employees = employeeRepository.findByEmpDepartment_DepartmentName(departmentName);
         } else {
             employees = employeeRepository.findAll();
         }
@@ -67,15 +78,21 @@ public class EmployeeService {
 
     public EmployeeResponse getEmployee(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
         return mapToResponse(employee);
     }
 
+    @Transactional
     public EmployeeResponse updateEmployee(Long employeeId, EmployeeCreateRequest request) {
         Employee employee = employeeRepository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + employeeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
 
-        employee.setEmpDepartment(request.getEmpDepartment());
+        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
+
+        employee.setEmpDepartment(department);
+        employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
         employee.setEducationBackground(request.getEducationBackground());
@@ -108,14 +125,19 @@ public class EmployeeService {
         return mapToResponse(updatedEmployee);
     }
 
+    @Transactional
     public void deleteEmployee(Long employeeId) {
         employeeRepository.deleteById(employeeId);
     }
 
     private EmployeeResponse mapToResponse(Employee employee) {
         EmployeeResponse response = new EmployeeResponse();
-        response.setEmpNumber(employee.getId());
-        response.setEmpDepartment(employee.getEmpDepartment());
+
+        String departmentName = employee.getEmpDepartment().getDepartmentName();
+
+        response.setId(employee.getId());
+        response.setEmpDepartment(departmentName);
+        response.setName(employee.getName());
         response.setGender(employee.getGender());
         response.setAge(employee.getAge());
         response.setEducationBackground(employee.getEducationBackground());

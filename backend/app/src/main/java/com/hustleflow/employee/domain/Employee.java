@@ -1,16 +1,15 @@
 package com.hustleflow.employee.domain;
 
+import com.hustleflow.department.domain.Department;
+
 import jakarta.persistence.*;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import lombok.Getter;
 import lombok.Setter;
-
-import com.hustleflow.department.domain.Department;
 
 @Entity
 @Getter
@@ -21,8 +20,12 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "emp_department", nullable = false)
-    private String empDepartment;
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @ManyToOne
+    @JoinColumn(name = "department_name", referencedColumnName = "department_name")
+    private Department empDepartment;
 
     @Column(name = "gender", nullable = false)
     private String gender;

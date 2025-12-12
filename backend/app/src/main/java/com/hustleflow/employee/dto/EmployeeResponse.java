@@ -5,8 +5,9 @@ import lombok.Data;
 @Data
 public class EmployeeResponse {
 
-    private Long empNumber;
+    private Long id;
     private String empDepartment;
+    private String name;
     private String gender;
     private Integer age;
     private String educationBackground;

@@ -17,22 +17,20 @@ public class EmployeeController {
 
     private final EmployeeService employeeService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<EmployeeResponse> createEmployee(@RequestBody EmployeeCreateRequest request) {
         EmployeeResponse response = employeeService.createEmployee(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
-    public List<EmployeeResponse> getEmployees(@RequestParam(required = false) String department,
-            @RequestParam(required = false) String position,
-            @RequestParam(required = false) Boolean resigned) {
-        return employeeService.getEmployees(department, position, resigned);
+    @GetMapping("")
+    public List<EmployeeResponse> getEmployees(@RequestParam(required = false) String department) {
+        return employeeService.getEmployees(department);
     }
 
     @GetMapping("/{employeeId}")
-    public EmployeeResponse getEmployee(@PathVariable Long employeeId) {
-        return employeeService.getEmployee(employeeId);
+    public ResponseEntity<EmployeeResponse> getEmployee(@PathVariable Long employeeId) {
+        return ResponseEntity.ok(employeeService.getEmployee(employeeId));
     }
 
     @PutMapping("/{employeeId}")
