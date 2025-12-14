@@ -1,140 +1,170 @@
 package com.hustleflow.employee.service;
 
 import com.hustleflow.department.domain.Department;
+import com.hustleflow.department.repository.DepartmentRepository;
 import com.hustleflow.employee.domain.Employee;
-import com.hustleflow.employee.domain.EmployeeRequest;
-import com.hustleflow.employee.domain.EmployeeResponse;
+import com.hustleflow.employee.dto.EmployeeCreateRequest;
+import com.hustleflow.employee.dto.EmployeeResponse;
 import com.hustleflow.employee.repository.EmployeeRepository;
+import com.hustleflow.exception.ResourceNotFoundException;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class EmployeeService {
 
-    private final EmployeeRepository repo;
+    private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public EmployeeService(EmployeeRepository repo) {
-        this.repo = repo;
+    @Transactional
+    public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
+        Employee employee = new Employee();
+
+        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
+
+        employee.setEmpDepartment(department);
+        employee.setName(request.getName());
+        employee.setGender(request.getGender());
+        employee.setAge(request.getAge());
+        employee.setEducationBackground(request.getEducationBackground());
+        employee.setPerformanceScore(request.getPerformanceScore());
+        employee.setOverTime(request.getOverTime());
+        employee.setNumCompaniesWorked(request.getNumCompaniesWorked());
+        employee.setEmpJobLevel(request.getEmpJobLevel());
+        employee.setEmpJobInvolvement(request.getEmpJobInvolvement());
+        employee.setEmpHourlyRate(request.getEmpHourlyRate());
+        employee.setEmpJobSatisfaction(request.getEmpJobSatisfaction());
+        employee.setEmpEnvironmentSatisfaction(request.getEmpEnvironmentSatisfaction());
+        employee.setMaritalStatus(request.getMaritalStatus());
+        employee.setEmpJobRole(request.getEmpJobRole());
+        employee.setBusinessTravelFrequency(request.getBusinessTravelFrequency());
+        employee.setDistanceFromHome(request.getDistanceFromHome());
+        employee.setEmpEducationLevel(request.getEmpEducationLevel());
+        employee.setEmpLastSalaryHikePercent(request.getEmpLastSalaryHikePercent());
+        employee.setEmpRelationshipSatisfaction(request.getEmpRelationshipSatisfaction());
+        employee.setTotalWorkExperienceInYears(request.getTotalWorkExperienceInYears());
+        employee.setTrainingTimesLastYear(request.getTrainingTimesLastYear());
+        employee.setEmpWorkLifeBalance(request.getEmpWorkLifeBalance());
+        employee.setExperienceYearsAtThisCompany(request.getExperienceYearsAtThisCompany());
+        employee.setExperienceYearsInCurrentRole(request.getExperienceYearsInCurrentRole());
+        employee.setYearsSinceLastPromotion(request.getYearsSinceLastPromotion());
+        employee.setYearsWithCurrManager(request.getYearsWithCurrManager());
+        employee.setAttrition(request.getAttrition());
+        employee.setPerformanceRating(request.getPerformanceRating());
+
+        Employee savedEmployee = employeeRepository.save(employee);
+        return mapToResponse(savedEmployee);
     }
 
-    public List<EmployeeResponse> getAll() {
-        return repo.findAll()
-                .stream()
-                .map(this::toResponse)
+    public List<EmployeeResponse> getEmployees(String departmentName) {
+        List<Employee> employees;
+        if (departmentName != null) {
+            employees = employeeRepository.findByEmpDepartment_DepartmentName(departmentName);
+        } else {
+            employees = employeeRepository.findAll();
+        }
+        return employees.stream()
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
-    public EmployeeResponse getById(Long id) {
-        return repo.findById(id)
-                .map(this::toResponse)
-                .orElse(null);
+    public EmployeeResponse getEmployee(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
+        return mapToResponse(employee);
     }
 
-    public Long create(EmployeeRequest req) {
-        Employee e = fromRequest(req);
+    @Transactional
+    public EmployeeResponse updateEmployee(Long employeeId, EmployeeCreateRequest request) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
 
-        Department deptRef = Department.builder()
-                .id(req.getDepartmentId())
-                .build();
-        e.setDepartment(deptRef);
+        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
 
-        repo.save(e);
-        return e.getId();
+        employee.setEmpDepartment(department);
+        employee.setName(request.getName());
+        employee.setGender(request.getGender());
+        employee.setAge(request.getAge());
+        employee.setEducationBackground(request.getEducationBackground());
+        employee.setPerformanceScore(request.getPerformanceScore());
+        employee.setOverTime(request.getOverTime());
+        employee.setNumCompaniesWorked(request.getNumCompaniesWorked());
+        employee.setEmpJobLevel(request.getEmpJobLevel());
+        employee.setEmpJobInvolvement(request.getEmpJobInvolvement());
+        employee.setEmpHourlyRate(request.getEmpHourlyRate());
+        employee.setEmpJobSatisfaction(request.getEmpJobSatisfaction());
+        employee.setEmpEnvironmentSatisfaction(request.getEmpEnvironmentSatisfaction());
+        employee.setMaritalStatus(request.getMaritalStatus());
+        employee.setEmpJobRole(request.getEmpJobRole());
+        employee.setBusinessTravelFrequency(request.getBusinessTravelFrequency());
+        employee.setDistanceFromHome(request.getDistanceFromHome());
+        employee.setEmpEducationLevel(request.getEmpEducationLevel());
+        employee.setEmpLastSalaryHikePercent(request.getEmpLastSalaryHikePercent());
+        employee.setEmpRelationshipSatisfaction(request.getEmpRelationshipSatisfaction());
+        employee.setTotalWorkExperienceInYears(request.getTotalWorkExperienceInYears());
+        employee.setTrainingTimesLastYear(request.getTrainingTimesLastYear());
+        employee.setEmpWorkLifeBalance(request.getEmpWorkLifeBalance());
+        employee.setExperienceYearsAtThisCompany(request.getExperienceYearsAtThisCompany());
+        employee.setExperienceYearsInCurrentRole(request.getExperienceYearsInCurrentRole());
+        employee.setYearsSinceLastPromotion(request.getYearsSinceLastPromotion());
+        employee.setYearsWithCurrManager(request.getYearsWithCurrManager());
+        employee.setAttrition(request.getAttrition());
+        employee.setPerformanceRating(request.getPerformanceRating());
+
+        Employee updatedEmployee = employeeRepository.save(employee);
+        return mapToResponse(updatedEmployee);
     }
 
-    public EmployeeResponse update(Long employeeId, EmployeeRequest req) {
-        Optional<Employee> opt = repo.findById(employeeId);
-        if (opt.isEmpty()) {
-            return null;
-        }
-
-        Employee e = opt.get();
-
-        Department deptRef = Department.builder()
-                .id(req.getDepartmentId())
-                .build();
-        e.setDepartment(deptRef);
-
-        e.setGender(req.getGender());
-        e.setAge(req.getAge());
-        e.setJobTitle(req.getJobTitle());
-        e.setHireDate(req.getHireDate());
-        e.setYearsAtCompany(req.getYearsAtCompany());
-        e.setEducationLevel(req.getEducationLevel());
-        e.setPerformanceScore(req.getPerformanceScore());
-        e.setMonthlySalary(req.getMonthlySalary());
-        e.setWorkHoursPerWeek(req.getWorkHoursPerWeek());
-        e.setProjectsHandled(req.getProjectsHandled());
-        e.setOvertimeHours(req.getOvertimeHours());
-        e.setSickDays(req.getSickDays());
-        e.setRemoteWorkFrequency(req.getRemoteWorkFrequency());
-        e.setTeamSize(req.getTeamSize());
-        e.setTrainingHours(req.getTrainingHours());
-        e.setPromotions(req.getPromotions());
-        e.setEmployeeSatisfactionScore(req.getEmployeeSatisfactionScore());
-        e.setResigned(req.getResigned());
-
-        repo.save(e);
-        return toResponse(e);
+    @Transactional
+    public void deleteEmployee(Long employeeId) {
+        employeeRepository.deleteById(employeeId);
     }
 
-    public void delete(Long employeeId) {
-        Optional<Employee> opt = repo.findById(employeeId);
-        opt.ifPresent(repo::delete);
-    }
+    private EmployeeResponse mapToResponse(Employee employee) {
+        EmployeeResponse response = new EmployeeResponse();
 
-    private EmployeeResponse toResponse(Employee e) {
-        EmployeeResponse dto = new EmployeeResponse();
-        dto.setId(e.getId());
+        String departmentName = employee.getEmpDepartment().getDepartmentName();
 
-        if (e.getDepartment() != null) {
-            dto.setDepartmentName(e.getDepartment().getDepartmentName());
-        }
-
-        dto.setGender(e.getGender());
-        dto.setAge(e.getAge());
-        dto.setJobTitle(e.getJobTitle());
-        dto.setHireDate(e.getHireDate());
-        dto.setYearsAtCompany(e.getYearsAtCompany());
-        dto.setEducationLevel(e.getEducationLevel());
-        dto.setPerformanceScore(e.getPerformanceScore());
-        dto.setMonthlySalary(e.getMonthlySalary());
-        dto.setWorkHoursPerWeek(e.getWorkHoursPerWeek());
-        dto.setProjectsHandled(e.getProjectsHandled());
-        dto.setOvertimeHours(e.getOvertimeHours());
-        dto.setSickDays(e.getSickDays());
-        dto.setRemoteWorkFrequency(e.getRemoteWorkFrequency());
-        dto.setTeamSize(e.getTeamSize());
-        dto.setTrainingHours(e.getTrainingHours());
-        dto.setPromotions(e.getPromotions());
-        dto.setEmployeeSatisfactionScore(e.getEmployeeSatisfactionScore());
-        dto.setResigned(e.getResigned());
-        return dto;
-    }
-
-    private Employee fromRequest(EmployeeRequest req) {
-        Employee e = new Employee();
-        e.setGender(req.getGender());
-        e.setAge(req.getAge());
-        e.setJobTitle(req.getJobTitle());
-        e.setHireDate(req.getHireDate());
-        e.setYearsAtCompany(req.getYearsAtCompany());
-        e.setEducationLevel(req.getEducationLevel());
-        e.setPerformanceScore(req.getPerformanceScore());
-        e.setMonthlySalary(req.getMonthlySalary());
-        e.setWorkHoursPerWeek(req.getWorkHoursPerWeek());
-        e.setProjectsHandled(req.getProjectsHandled());
-        e.setOvertimeHours(req.getOvertimeHours());
-        e.setSickDays(req.getSickDays());
-        e.setRemoteWorkFrequency(req.getRemoteWorkFrequency());
-        e.setTeamSize(req.getTeamSize());
-        e.setTrainingHours(req.getTrainingHours());
-        e.setPromotions(req.getPromotions());
-        e.setEmployeeSatisfactionScore(req.getEmployeeSatisfactionScore());
-        e.setResigned(req.getResigned());
-        return e;
+        response.setId(employee.getId());
+        response.setEmpDepartment(departmentName);
+        response.setName(employee.getName());
+        response.setGender(employee.getGender());
+        response.setAge(employee.getAge());
+        response.setEducationBackground(employee.getEducationBackground());
+        response.setPerformanceScore(employee.getPerformanceScore());
+        response.setOverTime(employee.getOverTime());
+        response.setNumCompaniesWorked(employee.getNumCompaniesWorked());
+        response.setEmpJobLevel(employee.getEmpJobLevel());
+        response.setEmpJobInvolvement(employee.getEmpJobInvolvement());
+        response.setEmpHourlyRate(employee.getEmpHourlyRate());
+        response.setEmpJobSatisfaction(employee.getEmpJobSatisfaction());
+        response.setEmpEnvironmentSatisfaction(employee.getEmpEnvironmentSatisfaction());
+        response.setMaritalStatus(employee.getMaritalStatus());
+        response.setEmpJobRole(employee.getEmpJobRole());
+        response.setBusinessTravelFrequency(employee.getBusinessTravelFrequency());
+        response.setDistanceFromHome(employee.getDistanceFromHome());
+        response.setEmpEducationLevel(employee.getEmpEducationLevel());
+        response.setEmpLastSalaryHikePercent(employee.getEmpLastSalaryHikePercent());
+        response.setEmpRelationshipSatisfaction(employee.getEmpRelationshipSatisfaction());
+        response.setTotalWorkExperienceInYears(employee.getTotalWorkExperienceInYears());
+        response.setTrainingTimesLastYear(employee.getTrainingTimesLastYear());
+        response.setEmpWorkLifeBalance(employee.getEmpWorkLifeBalance());
+        response.setExperienceYearsAtThisCompany(employee.getExperienceYearsAtThisCompany());
+        response.setExperienceYearsInCurrentRole(employee.getExperienceYearsInCurrentRole());
+        response.setYearsSinceLastPromotion(employee.getYearsSinceLastPromotion());
+        response.setYearsWithCurrManager(employee.getYearsWithCurrManager());
+        response.setAttrition(employee.getAttrition());
+        response.setPerformanceRating(employee.getPerformanceRating());
+        return response;
     }
 }

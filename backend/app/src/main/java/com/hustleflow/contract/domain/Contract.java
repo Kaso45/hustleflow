@@ -8,6 +8,7 @@ import java.time.LocalDate;
 
 import com.hustleflow.contract.enums.ContractStatus;
 import com.hustleflow.contract.enums.ContractType;
+import com.hustleflow.employee.domain.Employee;
 
 @Entity
 @Data
@@ -18,8 +19,9 @@ public class Contract {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long employeeId;
+    @OneToOne
+    @JoinColumn(name = "employee_id", referencedColumnName = "id")
+    private Employee employee;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

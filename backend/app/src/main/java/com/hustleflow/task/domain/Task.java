@@ -5,6 +5,11 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
+import com.hustleflow.employee.domain.Employee;
+import com.hustleflow.project.domain.Project;
+import com.hustleflow.task.enums.TaskPriority;
+import com.hustleflow.task.enums.TaskStatus;
+
 @Entity
 @Table(name = "tasks")
 @Getter
@@ -18,11 +23,13 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne
+    @JoinColumn(name = "project_id", referencedColumnName = "id")
+    private Project project;
 
-    @Column(name = "assignee_id", nullable = false)
-    private Long assigneeId;
+    @ManyToOne
+    @JoinColumn(name = "assignee_id", referencedColumnName = "id")
+    private Employee assignee;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -32,11 +39,14 @@ public class Task {
 
     private LocalDateTime deadline;
 
-    @Column(nullable = false, length = 20)
-    private String priority;
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskPriority priority;
 
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Builder.Default
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private TaskStatus status = TaskStatus.TODO;
 
     @Column(name = "completion_note", columnDefinition = "text")
     private String completionNote;

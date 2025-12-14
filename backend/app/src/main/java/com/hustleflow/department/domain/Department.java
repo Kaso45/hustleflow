@@ -1,18 +1,26 @@
 package com.hustleflow.department.domain;
 
+import com.hustleflow.employee.domain.Employee;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "departments")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Department {
 
     @Id
@@ -28,7 +36,8 @@ public class Department {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "manager_id", unique = true, nullable = false)
-    private Long managerId;
+    @OneToOne
+    @JoinColumn(name = "manager_id", referencedColumnName = "id")
+    private Employee manager;
 
 }

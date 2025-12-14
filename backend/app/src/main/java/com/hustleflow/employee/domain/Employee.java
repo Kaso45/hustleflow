@@ -1,82 +1,111 @@
 package com.hustleflow.employee.domain;
 
+import com.hustleflow.department.domain.Department;
+
+import jakarta.persistence.*;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Data;
-
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "employees")
 @Getter
 @Setter
-@NoArgsConstructor
 public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "employee_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "department_id", referencedColumnName = "id", nullable = false)
-    private Department department;
+    @Column(name = "name", nullable = false)
+    private String name;
 
-    @Column(name = "gender")
+    @ManyToOne
+    @JoinColumn(name = "department_name", referencedColumnName = "department_name")
+    private Department empDepartment;
+
+    @Column(name = "gender", nullable = false)
     private String gender;
 
-    @Column(name = "age")
+    @Column(name = "age", nullable = false)
     private Integer age;
 
-    @Column(name = "job_title")
-    private String jobTitle;
-
-    @Column(name = "hire_date")
-    private LocalDateTime hireDate;
-
-    @Column(name = "years_at_company")
-    private Integer yearsAtCompany;
-
-    @Column(name = "education_level")
-    private String educationLevel;
+    @Column(name = "education_background")
+    private String educationBackground;
 
     @Column(name = "performance_score")
     private Integer performanceScore;
 
-    @Column(name = "monthly_salary")
-    private Integer monthlySalary;
+    @Column(name = "overtime")
+    private Boolean overTime;
 
-    @Column(name = "work_hours_per_week")
-    private Integer workHoursPerWeek;
+    @Column(name = "num_companies_worked")
+    private Integer numCompaniesWorked;
 
-    @Column(name = "projects_handled")
-    private Integer projectsHandled;
+    @Column(name = "emp_job_level")
+    private Integer empJobLevel;
 
-    @Column(name = "overtime_hours")
-    private Integer overtimeHours;
+    @Column(name = "emp_job_involvement")
+    private Integer empJobInvolvement;
 
-    @Column(name = "sick_days")
-    private Integer sickDays;
+    @Column(name = "emp_hourly_rate")
+    private Double empHourlyRate;
 
-    @Column(name = "remote_work_frequency")
-    private Integer remoteWorkFrequency;
+    @Column(name = "emp_job_satisfaction")
+    private Integer empJobSatisfaction;
 
-    @Column(name = "team_size")
-    private Integer teamSize;
+    @Column(name = "emp_environment_satisfaction")
+    private Integer empEnvironmentSatisfaction;
 
-    @Column(name = "training_hours")
-    private Integer trainingHours;
+    @Column(name = "marital_status")
+    private String maritalStatus;
 
-    @Column(name = "promotions")
-    private Integer promotions;
+    @Column(name = "emp_job_role")
+    private String empJobRole;
 
-    @Column(name = "employee_satisfaction_score")
-    private Double employeeSatisfactionScore;
+    @Column(name = "business_travel_frequency")
+    private String businessTravelFrequency;
 
-    @Column(name = "resigned")
-    private Boolean resigned;
+    @Column(name = "distance_from_home")
+    private Integer distanceFromHome;
+
+    @Column(name = "emp_education_level")
+    private Integer empEducationLevel;
+
+    @Column(name = "emp_last_salary_hike_percent")
+    private Integer empLastSalaryHikePercent;
+
+    @Column(name = "emp_relationship_satisfaction")
+    private Integer empRelationshipSatisfaction;
+
+    @Column(name = "total_work_experience_in_years")
+    private Integer totalWorkExperienceInYears;
+
+    @Column(name = "training_times_last_year")
+    private Integer trainingTimesLastYear;
+
+    @Column(name = "emp_work_life_balance")
+    private Integer empWorkLifeBalance;
+
+    @Column(name = "experience_years_at_this_company")
+    private Integer experienceYearsAtThisCompany;
+
+    @Column(name = "experience_years_in_current_role")
+    private Integer experienceYearsInCurrentRole;
+
+    @Column(name = "years_since_last_promotion")
+    private Integer yearsSinceLastPromotion;
+
+    @Column(name = "years_with_curr_manager")
+    private Integer yearsWithCurrManager;
+
+    @Column(name = "attrition")
+    private Boolean attrition;
+
+    @Column(name = "performance_rating")
+    private Integer performanceRating;
+
 }
