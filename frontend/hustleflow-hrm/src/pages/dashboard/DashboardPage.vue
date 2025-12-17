@@ -162,9 +162,8 @@ const recentTasks = computed(() => (store.tasks || []).slice().sort((a,b) => new
   gap: 14px;
 }
 
-.recent-area > *{ grid-column:; }
-
-/* quick text */
+.recent-area > *{ grid-column: span 1; }
+/* quick text */ 
 .info ul{ list-style:none; padding:0; margin:0; font-size:14px; color:var(--text-weak); }
 .updated{ font-size:12px; color:var(--text-weak); }
 

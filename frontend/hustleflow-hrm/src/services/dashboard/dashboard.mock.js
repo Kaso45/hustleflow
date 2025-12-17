@@ -4,7 +4,14 @@
 
 const nowIso = () => new Date().toISOString();
 
+/* ================================
+   EMPLOYEES (15 records)
+   - GIỮ NGUYÊN 1–3
+   - BỔ SUNG 4–15
+================================ */
+
 const mockEmployees = [
+  // ===== EXISTING (1–3) =====
   {
     EmpNumber: 1,
     EmpDepartment: "Sales",
@@ -57,13 +64,37 @@ const mockEmployees = [
     PerformanceRating: 2,
     createdAt: nowIso()
   },
-  // ... add more mock items if desired
+
+  // ===== ADDED (4–15) =====
+  { EmpNumber: 4, EmpDepartment: "HR", Gender: "Female", Age: 28, Performance_Score: 4, Attrition: false, PerformanceRating: 4, createdAt: nowIso() },
+  { EmpNumber: 5, EmpDepartment: "Finance", Gender: "Male", Age: 42, Performance_Score: 5, Attrition: false, PerformanceRating: 5, createdAt: nowIso() },
+  { EmpNumber: 6, EmpDepartment: "Sales", Gender: "Female", Age: 33, Performance_Score: 3, Attrition: false, PerformanceRating: 3, createdAt: nowIso() },
+  { EmpNumber: 7, EmpDepartment: "Engineering", Gender: "Male", Age: 26, Performance_Score: 4, Attrition: false, PerformanceRating: 4, createdAt: nowIso() },
+  { EmpNumber: 8, EmpDepartment: "Marketing", Gender: "Female", Age: 30, Performance_Score: 4, Attrition: true, PerformanceRating: 3, createdAt: nowIso() },
+  { EmpNumber: 9, EmpDepartment: "Finance", Gender: "Female", Age: 37, Performance_Score: 5, Attrition: false, PerformanceRating: 5, createdAt: nowIso() },
+  { EmpNumber: 10, EmpDepartment: "HR", Gender: "Male", Age: 45, Performance_Score: 2, Attrition: true, PerformanceRating: 2, createdAt: nowIso() },
+  { EmpNumber: 11, EmpDepartment: "Engineering", Gender: "Female", Age: 34, Performance_Score: 4, Attrition: false, PerformanceRating: 4, createdAt: nowIso() },
+  { EmpNumber: 12, EmpDepartment: "Sales", Gender: "Male", Age: 39, Performance_Score: 3, Attrition: false, PerformanceRating: 3, createdAt: nowIso() },
+  { EmpNumber: 13, EmpDepartment: "Marketing", Gender: "Male", Age: 27, Performance_Score: 4, Attrition: false, PerformanceRating: 4, createdAt: nowIso() },
+  { EmpNumber: 14, EmpDepartment: "Engineering", Gender: "Male", Age: 41, Performance_Score: 5, Attrition: false, PerformanceRating: 5, createdAt: nowIso() },
+  { EmpNumber: 15, EmpDepartment: "Finance", Gender: "Female", Age: 32, Performance_Score: 3, Attrition: false, PerformanceRating: 3, createdAt: nowIso() }
 ];
+
+/* ================================
+   DEPARTMENTS
+================================ */
 
 const mockDepartments = [
   { id: 1, departmentName: "Sales", code: "SALES", description: "Sales team", managerId: 10 },
   { id: 2, departmentName: "Engineering", code: "ENG", description: "Engineering", managerId: 12 },
+  { id: 3, departmentName: "HR", code: "HR", description: "Human Resources", managerId: 11 },
+  { id: 4, departmentName: "Finance", code: "FIN", description: "Finance team", managerId: 9 },
+  { id: 5, departmentName: "Marketing", code: "MKT", description: "Marketing team", managerId: 8 }
 ];
+
+/* ================================
+   LEAVES
+================================ */
 
 const mockLeaves = [
   {
@@ -90,23 +121,38 @@ const mockLeaves = [
   }
 ];
 
+/* ================================
+   TASKS
+================================ */
+
 const mockTasks = [
   { id: 201, projectId: 10, assigneeId: 1, title: "Fix API Bug", description: "Login API returns 500", deadline: "2025-12-15T12:00:00", priority: "HIGH", status: "IN_PROGRESS", assigneeName: "John Doe" },
   { id: 202, projectId: 11, assigneeId: 3, title: "Design UI", description: "Create dashboard UI", deadline: "2025-12-20T12:00:00", priority: "MEDIUM", status: "TODO", assigneeName: "Alex" }
 ];
 
+/* ================================
+   PROJECTS
+================================ */
+
 const mockProjects = [
   { id: 10, projectName: "HustleFlow Web", description: "HRM Web", startDate: "2025-01-01", endDate: "2025-06-01", status: "ACTIVE", managerId: 1 },
-  { id: 11, projectName: "Mobile App", description: "HustleFlow Mobile", startDate: "2025-02-01", endDate: null, status: "ACTIVE", managerId: 2 }
+  { id: 11, projectName: "HustleFlow Mobile", description: "Mobile App", startDate: "2025-02-01", endDate: null, status: "ACTIVE", managerId: 2 }
 ];
+
+/* ================================
+   PAYROLLS
+================================ */
 
 const mockPayrolls = [
   { id: 301, employeeId: 1, month: 12, year: 2025, baseSalary: 10000000, bonus: 500000, deduction: 0, netSalary: 10500000, status: "PAID" },
   { id: 302, employeeId: 2, month: 12, year: 2025, baseSalary: 12000000, bonus: 0, deduction: 0, netSalary: 12000000, status: "UNPAID" }
 ];
 
+/* ================================
+   API FUNCTIONS
+================================ */
+
 export async function GET_employees() {
-  // Simulate network delay
   await new Promise(r => setTimeout(r, 120));
   return JSON.parse(JSON.stringify(mockEmployees));
 }
@@ -117,19 +163,14 @@ export async function GET_departments() {
 }
 
 export async function GET_leaves(params = {}) {
-  // params may include status filter
   await new Promise(r => setTimeout(r, 80));
-  if (params && params.status) {
-    return mockLeaves.filter(l => l.status === params.status);
-  }
+  if (params.status) return mockLeaves.filter(l => l.status === params.status);
   return JSON.parse(JSON.stringify(mockLeaves));
 }
 
 export async function GET_tasks(params = {}) {
   await new Promise(r => setTimeout(r, 80));
-  if (params && params.status) {
-    return mockTasks.filter(t => t.status === params.status);
-  }
+  if (params.status) return mockTasks.filter(t => t.status === params.status);
   return JSON.parse(JSON.stringify(mockTasks));
 }
 
@@ -138,21 +179,19 @@ export async function GET_projects() {
   return JSON.parse(JSON.stringify(mockProjects));
 }
 
-/**
- * GET /api/payrolls?month=...&year=...
- * -> return array of payrolls for given month/year
- */
 export async function GET_payrolls(query = {}) {
   await new Promise(r => setTimeout(r, 80));
-  const month = Number(query.month);
-  const year = Number(query.year);
-  if (!isNaN(month) && !isNaN(year)) {
-    return mockPayrolls.filter(p => p.month === month && p.year === year);
+  const { month, year } = query;
+  if (month && year) {
+    return mockPayrolls.filter(p => p.month === Number(month) && p.year === Number(year));
   }
   return JSON.parse(JSON.stringify(mockPayrolls));
 }
 
-// Export single default object for convenience
+/* ================================
+   DEFAULT EXPORT
+================================ */
+
 export default {
   GET_employees,
   GET_departments,
