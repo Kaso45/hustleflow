@@ -4,8 +4,9 @@
     <ul>
       <li v-for="t in tasks" :key="t.id" class="recent-item">
         <div class="left">
-          <div class="name">{{ t.title || t.taskName || '—' }}</div>
-          <div class="meta">{{ t.assigneeName || t.owner || '' }} • {{ t.status }}</div>
+          <!-- Swagger TaskResponse field is 'title' -->
+          <div class="name">{{ t.title || t.description || 'Task' }}</div>
+          <div class="meta">{{ t.assigneeName || 'ID: ' + t.assigneeId }} • {{ t.status }}</div>
         </div>
         <div class="right">{{ formatDate(t.deadline) }}</div>
       </li>

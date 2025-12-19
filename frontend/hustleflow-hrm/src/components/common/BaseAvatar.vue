@@ -9,41 +9,48 @@ import { computed } from 'vue';
 
 const props = defineProps({
   name: { type: String, default: '' },
-  size: { type: Number, default: 36 }
+  size: { type: Number, default: 40 } // Mặc định to hơn chút (40px) cho giống design
 });
 
-// initials (2 letters)
 const initials = computed(() => {
-  if (!props.name) return '';
+  if (!props.name) return '??';
   const parts = props.name.trim().split(/\s+/);
   const first = parts[0]?.[0] ?? '';
   const last = parts.length > 1 ? parts[parts.length - 1][0] : (parts[0]?.[1] ?? '');
   return (first + last).toUpperCase();
 });
 
-// stable hue from string
-function nameToHue(name) {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) {
-    h = (h * 31 + name.charCodeAt(i)) % 360;
-  }
-  return h;
+// Hàm tạo màu pastel đẹp hơn (Teal/Cyan base)
+function getAvatarColor(name) {
+  const colors = [
+    { bg: '#c7e8f3', text: '#0e7490' }, // Cyan
+    { bg: '#e3f6f5', text: '#0f766e' }, // Teal
+    { bg: '#fee2e2', text: '#b91c1c' }, // Red
+    { bg: '#ffedd5', text: '#c2410c' }, // Orange
+    { bg: '#f3e8ff', text: '#7e22ce' }, // Purple
+    { bg: '#dcfce7', text: '#15803d' }, // Green
+    { bg: '#e0f2fe', text: '#0369a1' }, // Sky
+  ];
+  const index = name ? name.length % colors.length : 0;
+  return colors[index];
 }
 
-// pastel cold-tone gradient
 const avatarStyle = computed(() => {
-  const h = nameToHue(props.name || 'anon');
-  const coolHue = ((h % 100) + 180) % 360;
+  const colorSet = getAvatarColor(props.name || 'User');
   const size = props.size;
+  
   return {
     width: `${size}px`,
     height: `${size}px`,
-    borderRadius: "50%",
+    // Design System: Squircle radius (approx 25-30% of size)
+    borderRadius: `${size * 0.28}px`, 
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
-    background: `linear-gradient(135deg, hsl(${coolHue} 70% 90%), hsl(${(coolHue + 25) % 360} 70% 86%))`,
-    boxShadow: "0 2px 6px rgba(8,16,30,0.06)",
+    backgroundColor: colorSet.bg,
+    color: colorSet.text,
+    boxShadow: "0 2px 5px rgba(0,0,0,0.03)",
+    flexShrink: 0, // Quan trọng: Chống bị méo khi nằm trong flex
   };
 });
 
@@ -56,17 +63,22 @@ const sizeClass = computed(() => {
 
 <style scoped>
 .base-avatar {
-  font-weight: 600;
-  color: #0b2433;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
   user-select: none;
+  transition: transform 0.2s;
+}
+
+/* Hover effect nhẹ */
+.base-avatar:hover {
+  transform: scale(1.05);
 }
 
 .avatar-text {
-  font-size: 12px;
   line-height: 1;
 }
 
-.base-avatar.md .avatar-text { font-size: 12px; }
-.base-avatar.sm .avatar-text { font-size: 11px; }
-.base-avatar.lg .avatar-text { font-size: 14px; }
+.base-avatar.sm .avatar-text { font-size: 10px; }
+.base-avatar.md .avatar-text { font-size: 14px; }
+.base-avatar.lg .avatar-text { font-size: 18px; }
 </style>

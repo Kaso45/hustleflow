@@ -25,8 +25,6 @@ export const appRoutes = {
 
     // Payroll Module
     { path: 'payroll', name: 'PayrollOverview', component: () => import('@/pages/payroll/PayrollOverviewPage.vue') },
-    { path: 'payroll/generate', name: 'PayrollGenerate', component: () => import('@/pages/payroll/PayrollGeneratePage.vue') },
-    { path: 'payroll/detail', name: 'PayrollDetail', component: () => import('@/pages/payroll/PayrollDetailPage.vue') },
 
     // Performance Module
     { path: 'performance', name: 'Performance', component: () => import('@/pages/performance/PerformancePage.vue') },

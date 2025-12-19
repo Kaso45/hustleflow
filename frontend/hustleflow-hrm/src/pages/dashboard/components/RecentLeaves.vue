@@ -2,9 +2,11 @@
   <div class="holo-card card">
     <h4>Recent Leave Requests</h4>
     <ul>
+      <!-- 'id' instead of generic key -->
       <li v-for="l in leaves" :key="l.id" class="recent-item">
         <div class="left">
-          <div class="name">{{ l.employeeName || l.EmpName || '—' }}</div>
+          <!-- Fix: use correct field name for UI (from Mock extension) -->
+          <div class="name">{{ l.employeeName || l.name || 'ID: ' + l.employeeId }}</div>
           <div class="meta">{{ l.leaveType }} • {{ l.status }}</div>
         </div>
         <div class="right">{{ formatRange(l.startDate, l.endDate) }}</div>

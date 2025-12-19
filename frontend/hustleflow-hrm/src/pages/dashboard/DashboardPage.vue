@@ -84,9 +84,30 @@ const lastUpdatedDisplay = computed(() => store.lastUpdated ? new Date(store.las
 const payrollCount = computed(() => (store.payrolls || []).length || 0);
 const payrollLabel = computed(() => `${month}/${year}`);
 
-const recentEmployees = computed(() => (store.employees || []).slice().sort((a,b) => (b.EmpNumber||0) - (a.EmpNumber||0)).slice(0,6));
-const recentLeaves = computed(() => (store.leaves || []).slice().sort((a,b) => new Date(b.startDate) - new Date(a.startDate)).slice(0,6));
-const recentTasks = computed(() => (store.tasks || []).slice().sort((a,b) => new Date(b.deadline) - new Date(a.deadline)).slice(0,6));
+const recentEmployees = computed(() => {
+  const list = store.employees || [];
+  // API trả về 'id', không phải 'EmpNumber'
+  // Clone mảng trước khi sort để tránh mutate state
+  return [...list]
+    .sort((a, b) => (b.id || 0) - (a.id || 0))
+    .slice(0, 6);
+});
+
+const recentLeaves = computed(() => {
+  const list = store.leaves || [];
+  // API có 'startDate' -> OK
+  return [...list]
+    .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+    .slice(0, 6);
+});
+
+const recentTasks = computed(() => {
+  const list = store.tasks || [];
+  // API có 'deadline' -> OK
+  return [...list]
+    .sort((a, b) => new Date(b.deadline) - new Date(a.deadline))
+    .slice(0, 6);
+});
 </script>
 
 <style scoped>

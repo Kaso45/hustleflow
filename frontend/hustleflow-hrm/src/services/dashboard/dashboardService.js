@@ -1,88 +1,99 @@
 // src/services/dashboard/dashboardService.js
 import { USE_MOCK_API } from '@/config/appConfig';
-import mock from './dashboard.mock';
-import apiClient from '@/services/apiClient';
 import { groupBy } from '@/utils/groupBy';
 
-/**
- * All dashboard-related data fetchers.
- * When USE_MOCK_API = true → mock data is returned.
- * When USE_MOCK_API = false → apiClient calls backend.
- */
+// Import các Services chuyên biệt (Single Source of Truth)
+import employeeService from '@/services/employeeService';
+import departmentService from '@/services/departmentService';
+import leaveService from '@/services/leaveService';
+import taskService from '@/services/taskService';
+import projectService from '@/services/projectService';
+import payrollService from '@/services/payrollService';
 
-const BASE = '/api';
+/* --------------------------------------------------------
+   FETCHERS: Gọi trực tiếp từ các Service đã chuẩn hóa
+-------------------------------------------------------- */
 
 async function getEmployees() {
-  if (USE_MOCK_API) return mock.GET_employees();
-  const res = await apiClient.get(`${BASE}/employees`);
-  return res.data;
+  const res = await employeeService.getEmployees();
+  return res.data || [];
 }
 
 async function getDepartments() {
-  if (USE_MOCK_API) return mock.GET_departments();
-  const res = await apiClient.get(`${BASE}/departments`);
-  return res.data;
+  const res = await departmentService.getDepartments();
+  return res.data || [];
 }
 
 async function getLeaves(params = {}) {
-  if (USE_MOCK_API) return mock.GET_leaves(params);
-  const res = await apiClient.get(`${BASE}/leaves`, { params });
-  return res.data;
+  const res = await leaveService.getLeaves(params);
+  return res.data || [];
 }
 
 async function getTasks(params = {}) {
-  if (USE_MOCK_API) return mock.GET_tasks(params);
-  const res = await apiClient.get(`${BASE}/tasks`, { params });
-  return res.data;
+  const res = await taskService.getTasks(params);
+  return res.data || [];
 }
 
 async function getProjects() {
-  if (USE_MOCK_API) return mock.GET_projects();
-  const res = await apiClient.get(`${BASE}/projects`);
-  return res.data;
+  const res = await projectService.getProjects();
+  return res.data || [];
 }
 
 async function getPayrolls(params = {}) {
-  if (USE_MOCK_API) return mock.GET_payrolls(params);
-  const res = await apiClient.get(`${BASE}/payrolls`, { params });
-  return res.data;
+  // Payroll thường cần filter theo tháng, ở đây dashboard lấy mặc định hoặc all
+  const res = await payrollService.getPayrolls(params);
+  return res.data || [];
 }
 
-/* ----------------------
-    DASHBOARD ANALYTICS
------------------------ */
+/* --------------------------------------------------------
+    DASHBOARD ANALYTICS (Logic tính toán KPI)
+    Giữ nguyên logic cũ để không làm hỏng giao diện Dashboard
+-------------------------------------------------------- */
 
 function computeKPIs({ employees = [], departments = [], leaves = [], tasks = [], projects = [] }) {
   return {
     totalEmployees: employees.length,
     totalDepartments: departments.length,
+    // Tính số đơn nghỉ phép đang chờ duyệt
     pendingLeaves: leaves.filter(l => l.status === 'PENDING').length,
-    activeTasks: tasks.filter(t => t.status === 'IN_PROGRESS').length,
+    // Tính task đang active (chưa DONE)
+    activeTasks: tasks.filter(t => t.status !== 'DONE').length, 
+    // Tính project đang chạy
     activeProjects: projects.filter(p => p.status === 'ACTIVE' || p.status === 'IN_PROGRESS').length,
   };
 }
 
 function computeAttrition(list = []) {
-  const resigned = list.filter(e =>
-    e.Attrition === true || e.Resigned === true || e.status === 'RESIGNED'
-  ).length;
-
+  // Logic giả định: đếm số người có field attrition=true (nếu có trong data mới)
+  // Nếu data mới không có field này, trả về mặc định
+  const resigned = list.filter(e => e.status === 'RESIGNED' || e.attrition === true).length;
   const active = list.length - resigned;
   return { resigned, active: Math.max(active, 0) };
 }
 
 function computeEmployeesByDept(list = []) {
-  const grouped = groupBy(list, 'EmpDepartment');
+  // Group theo 'empDepartment'
+  const grouped = groupBy(list, 'empDepartment');
   return Object.keys(grouped).map(key => ({
-    department: key,
+    department: key || 'Unknown',
     count: grouped[key].length,
   }));
 }
 
 function computePerfGroups(list = []) {
+  // Group theo performanceScore hoặc JobLevel (Giả lập scale 1-5)
+  // Logic cũ của bạn map theo Rating 1-5, ta tận dụng logic tương đương
   return list.reduce((acc, e) => {
-    const rating = (e.PerformanceRating ?? e.Performance_Score ?? 'Unknown').toString();
-    acc[rating] = (acc[rating] || 0) + 1;
+    // Chuyển score 0-100 thành rating 1-5 để vẽ biểu đồ tròn cũ
+    let rating = 3; 
+    if (e.performanceScore >= 90) rating = 5;
+    else if (e.performanceScore >= 80) rating = 4;
+    else if (e.performanceScore >= 60) rating = 3;
+    else if (e.performanceScore >= 40) rating = 2;
+    else rating = 1;
+
+    const key = rating.toString();
+    acc[key] = (acc[key] || 0) + 1;
     return acc;
   }, {});
 }
