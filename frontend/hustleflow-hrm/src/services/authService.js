@@ -1,32 +1,28 @@
-import apiClient from './apiClient'
+import apiClient from './apiClient';
+import { mapLoginResponse, mapRegisterResponse } from '../models/auth';
+import { USE_MOCK_API } from '../config/appConfig';
 
-const DEV_FAKE_USER = {
-  username: 'dev',
-  password: 'dev123',   // bạn tự đặt
-}
+import mockService from './authService.mock';
 
-export async function login(username, password) {
-  // DEV MOCK: nếu đúng user/pass này thì bỏ qua backend, trả token fake
-  if (import.meta.env.DEV &&
-      username === DEV_FAKE_USER.username &&
-      password === DEV_FAKE_USER.password) {
-    // giả lập delay 300ms cho giống thật
-    await new Promise((resolve) => setTimeout(resolve, 300))
-    return {
-      token: 'dev-fake-token',
-      expiresIn: 3600,
+const AuthService = {
+
+  async login(credentials) {
+    if (USE_MOCK_API) {
+      return mockService.login(credentials);
     }
-  }
 
-  // Còn lại thì gọi API backend thật
-  const res = await apiClient.post('/auth/login', {
-    username,
-    password,
-  })
-  return res.data
-}
+    const response = await apiClient.post('/auth/login', credentials);
+    return mapLoginResponse(response.data);
+  },
 
-export async function register(payload) {
-  const res = await apiClient.post('/auth/register', payload)
-  return res.data
-}
+  async register(payload) {
+    if (USE_MOCK_API) {
+      return mockService.register(payload);
+    }
+
+    const response = await apiClient.post('/auth/register', payload);
+    return mapRegisterResponse(response.data);
+  },
+};
+
+export default AuthService;

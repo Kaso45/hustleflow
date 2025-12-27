@@ -1,0 +1,12 @@
+:root {
+  --card-bg: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.12);
+  --text-strong: #071028;
+  --text-weak: #7b8794;
+
+  --accent-blue: #AEE3FF;
+  --accent-mint: #CFFFE8;
+  --accent-lav: #E3D9FF;
+
+  --card-shadow: 0 6px 18px rgba(7,16,40,0.04);
+}
