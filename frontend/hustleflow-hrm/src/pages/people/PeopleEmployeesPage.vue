@@ -1,3 +1,4 @@
+<!-- A:\Software Design Project Newest\hustleflow\frontend\hustleflow-hrm\src\pages\people\PeopleEmployeesPage.vue -->
 <template>
   <div class="page-container">
     <!-- Header -->
@@ -21,7 +22,8 @@
       </div>
       <div class="glass-card stat-card">
         <div class="stat-label">Avg Performance</div>
-        <div class="stat-value">82<span class="text-small">/100</span></div>
+        <!-- UPDATED: Tự động hiển thị điểm trung bình tính toán được -->
+        <div class="stat-value">{{ avgPerformance }}<span class="text-small">/100</span></div>
       </div>
     </div>
 
@@ -150,13 +152,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { Pencil, Trash2 } from 'lucide-vue-next'; // Import Icon chuẩn
+import { Pencil, Trash2 } from 'lucide-vue-next'; 
 import dashboardService from '@/services/dashboard/dashboardService';
 import employeeService from '@/services/employeeService'; 
 import BaseAvatar from '@/components/common/BaseAvatar.vue';
 import PeoplePageHeader from '@/components/common/PeoplePageHeader.vue';
 import FloatingTable from '@/components/common/FloatingTable.vue';
-import BaseModal from '@/components/common/BaseModal.vue'; // Import Modal mới
+import BaseModal from '@/components/common/BaseModal.vue'; 
 
 // State
 const employees = ref([]);
@@ -188,7 +190,6 @@ const openAddModal = () => {
 
 const openEditModal = (emp) => {
   isEditing.value = true;
-  // Clone data vào form
   Object.assign(formData, { ...emp });
   showModal.value = true;
 };
@@ -202,14 +203,12 @@ const handleSave = async () => {
     if (isEditing.value) {
       // UPDATE Logic
       await employeeService.updateEmployee(formData.id, formData);
-      // Cập nhật UI local (Optimistic update)
       const index = employees.value.findIndex(e => e.id === formData.id);
       if (index !== -1) employees.value[index] = { ...formData };
       alert("Updated successfully!");
     } else {
       // CREATE Logic
       const res = await employeeService.createEmployee(formData);
-      // Giả sử API trả về object vừa tạo (hoặc mock trả về)
       const newEmp = res.data || { ...formData, id: Date.now() }; 
       employees.value.unshift(newEmp);
       alert("Created successfully!");
@@ -249,6 +248,19 @@ const fetchData = async () => {
 };
 
 // --- HELPERS ---
+
+// UPDATED: Tự động tính điểm trung bình (AVG Performance)
+const avgPerformance = computed(() => {
+  if (!employees.value || employees.value.length === 0) return 0;
+  
+  const totalScore = employees.value.reduce((sum, emp) => {
+    // API trả về có thể null hoặc undefined, chuyển về Number để tính
+    return sum + (Number(emp.performanceScore) || 0);
+  }, 0);
+
+  return Math.round(totalScore / employees.value.length);
+});
+
 const filteredEmployees = computed(() => {
   let result = employees.value;
   if (selectedDept.value) result = result.filter(e => e.empDepartment === selectedDept.value);
@@ -258,6 +270,7 @@ const filteredEmployees = computed(() => {
   }
   return result;
 });
+
 const generateEmail = (name) => name ? `${name.toLowerCase().replace(/\s/g, '.')}@hustleflow.com` : '';
 const getDeptClass = (deptName) => {
   const map = { 'Sales': 'badge-blue', 'HR': 'badge-purple', 'Engineering': 'badge-green', 'Finance': 'badge-orange', 'Marketing': 'badge-pink' };
