@@ -85,7 +85,13 @@ public class PayrollService {
                 request.getDepartmentCodes().isEmpty()) {
             employees = employeeRepository.findAll();
         } else {
-            employees = employeeRepository.findByEmpDepartment_DepartmentNameIn(request.getDepartmentCodes());
+            // Convert department codes to department IDs, then query employees by
+            // department id
+            List<Department> departments = departmentRepository.findByCodeIn(request.getDepartmentCodes());
+            List<Long> departmentIds = departments.stream()
+                    .map(Department::getId)
+                    .collect(Collectors.toList());
+            employees = employeeRepository.findByEmpDepartment_IdIn(departmentIds);
         }
 
         return employees.stream()

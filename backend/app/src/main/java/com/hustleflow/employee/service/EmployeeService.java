@@ -26,11 +26,15 @@ public class EmployeeService {
     public EmployeeResponse createEmployee(EmployeeCreateRequest request) {
         Employee employee = new Employee();
 
-        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
-
-        employee.setEmpDepartment(department);
+        if (request.getEmpDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getEmpDepartmentId())
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException(
+                                    "Department doesn't exist: " + request.getEmpDepartmentId()));
+            employee.setEmpDepartment(department);
+        } else {
+            employee.setEmpDepartment(null);
+        }
         employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
@@ -64,10 +68,10 @@ public class EmployeeService {
         return mapToResponse(savedEmployee);
     }
 
-    public List<EmployeeResponse> getEmployees(String departmentName) {
+    public List<EmployeeResponse> getEmployees(Long departmentId) {
         List<Employee> employees;
-        if (departmentName != null) {
-            employees = employeeRepository.findByEmpDepartment_DepartmentName(departmentName);
+        if (departmentId != null) {
+            employees = employeeRepository.findByEmpDepartment_Id(departmentId);
         } else {
             employees = employeeRepository.findAll();
         }
@@ -87,11 +91,16 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
 
-        Department department = departmentRepository.findByDepartmentName(request.getEmpDepartment())
-                .orElseThrow(
-                        () -> new ResourceNotFoundException("Department doesn't exist: " + request.getEmpDepartment()));
-
-        employee.setEmpDepartment(department);
+        if (request.getEmpDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getEmpDepartmentId())
+                    .orElseThrow(
+                            () -> new ResourceNotFoundException(
+                                    "Department doesn't exist: " + request.getEmpDepartmentId()));
+            employee.setEmpDepartment(department);
+        } else {
+            // allow clearing department by sending null
+            employee.setEmpDepartment(null);
+        }
         employee.setName(request.getName());
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
@@ -133,9 +142,12 @@ public class EmployeeService {
     private EmployeeResponse mapToResponse(Employee employee) {
         EmployeeResponse response = new EmployeeResponse();
 
-        String departmentName = employee.getEmpDepartment().getDepartmentName();
+        Long departmentId = employee.getEmpDepartment() != null ? employee.getEmpDepartment().getId() : null;
+        String departmentName = employee.getEmpDepartment() != null ? employee.getEmpDepartment().getDepartmentName()
+                : null;
 
         response.setId(employee.getId());
+        response.setEmpDepartmentId(departmentId);
         response.setEmpDepartment(departmentName);
         response.setName(employee.getName());
         response.setGender(employee.getGender());

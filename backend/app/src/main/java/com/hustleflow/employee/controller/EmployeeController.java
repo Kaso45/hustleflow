@@ -24,7 +24,7 @@ public class EmployeeController {
     }
 
     @GetMapping("")
-    public List<EmployeeResponse> getEmployees(@RequestParam(required = false) String department) {
+    public List<EmployeeResponse> getEmployees(@RequestParam(required = false) Long department) {
         return employeeService.getEmployees(department);
     }
 
