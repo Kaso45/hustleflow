@@ -14,6 +14,7 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
+@Table(name = "employees")
 public class Employee {
 
     @Id
@@ -24,7 +25,7 @@ public class Employee {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "department_name", referencedColumnName = "department_name")
+    @JoinColumn(name = "department_id", referencedColumnName = "id")
     private Department empDepartment;
 
     @Column(name = "gender", nullable = false)
