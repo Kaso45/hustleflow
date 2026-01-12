@@ -10,10 +10,10 @@ import java.util.List;
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
 
     @EntityGraph(attributePaths = "empDepartment")
-    List<Employee> findByEmpDepartment_DepartmentName(String empDepartment);
+    List<Employee> findByEmpDepartment_Id(Long empDepartmentId);
 
     @EntityGraph(attributePaths = "empDepartment")
-    List<Employee> findByEmpDepartment_DepartmentNameIn(List<String> empDepartments);
+    List<Employee> findByEmpDepartment_IdIn(List<Long> empDepartmentIds);
 
     List<Employee> findByGender(String gender);
 

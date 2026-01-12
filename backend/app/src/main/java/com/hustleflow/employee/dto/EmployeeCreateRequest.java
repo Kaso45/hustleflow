@@ -3,15 +3,14 @@ package com.hustleflow.employee.dto;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+// department is optional now; it can be null on create/update
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
 public class EmployeeCreateRequest {
 
-    @NotBlank(message = "Department name is required")
-    private String empDepartment;
+    private Long empDepartmentId;
 
     private String name;
 
