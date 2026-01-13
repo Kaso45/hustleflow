@@ -25,6 +25,7 @@ public class AssessmentService {
 
     @Transactional(readOnly = true)
     public List<AssessmentResponse> getPerformanceAssessment(Long employeeId) {
+        @SuppressWarnings("unused")
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
 

@@ -8,7 +8,8 @@ import com.hustleflow.timesheet.enums.WorkStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,7 +33,7 @@ public class Timesheet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
 
@@ -48,6 +49,7 @@ public class Timesheet {
     @Column(name = "total_hours")
     private Double totalHours;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private WorkStatus status;
 

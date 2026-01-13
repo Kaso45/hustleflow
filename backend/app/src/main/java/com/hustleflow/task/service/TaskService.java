@@ -12,7 +12,5 @@ public interface TaskService {
 
     List<TaskResponse> getTasks(Long projectId, Long assigneeId, String status);
 
-    List<TaskResponse> getAllTasks();
-
     TaskResponse updateTaskStatus(Long taskId, TaskStatusUpdateRequest request);
 }

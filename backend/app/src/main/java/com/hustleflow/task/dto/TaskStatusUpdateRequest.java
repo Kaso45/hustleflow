@@ -9,7 +9,7 @@ import lombok.Setter;
 public class TaskStatusUpdateRequest {
 
     @NotBlank
-    private String status; // "DONE", "IN_PROGRESS", ...
+    private String status;
 
     private String completionNote;
 }

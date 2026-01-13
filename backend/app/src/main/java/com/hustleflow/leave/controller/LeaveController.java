@@ -19,7 +19,7 @@ public class LeaveController {
 
     private final LeaveService leaveService;
 
-    @PostMapping
+    @PostMapping("")
     public ResponseEntity<LeaveResponse> createLeaveRequest(@Valid @RequestBody LeaveCreateRequest leaveRequest) {
         LeaveResponse response = leaveService.createLeaveRequest(leaveRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -32,7 +32,7 @@ public class LeaveController {
         return ResponseEntity.ok(leave);
     }
 
-    @GetMapping
+    @GetMapping("")
     public List<LeaveResponse> getLeaves(@RequestParam(required = false) Long employeeId,
             @RequestParam(required = false) String status) {
         return leaveService.getLeaves(employeeId, status);

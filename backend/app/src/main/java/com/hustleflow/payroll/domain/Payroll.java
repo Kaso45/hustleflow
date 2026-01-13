@@ -1,5 +1,7 @@
 package com.hustleflow.payroll.domain;
 
+import com.hustleflow.department.domain.Department;
+import com.hustleflow.employee.domain.Employee;
 import com.hustleflow.payroll.enums.PayrollStatus;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,11 +18,13 @@ public class Payroll {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private Long employeeId;
+    @ManyToOne
+    @JoinColumn(name = "employee_id", referencedColumnName = "id")
+    private Employee employee;
 
-    @Column(name = "department_code")
-    private String departmentCode;
+    @ManyToOne
+    @JoinColumn(name = "department_code", referencedColumnName = "code")
+    private Department department;
 
     @Column(nullable = false)
     private int month;
@@ -47,4 +51,3 @@ public class Payroll {
     @Column(name = "generated_at", nullable = false)
     private LocalDateTime generatedAt = LocalDateTime.now();
 }
-

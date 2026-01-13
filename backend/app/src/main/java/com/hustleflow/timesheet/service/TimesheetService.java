@@ -4,8 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -23,6 +22,7 @@ import com.hustleflow.timesheet.repository.TimesheetRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 
 @Service
 public class TimesheetService {
@@ -38,7 +38,7 @@ public class TimesheetService {
         this.timesheetRepository = timesheetRepository;
     }
 
-    public TimesheetReponse getTimesheetHistory(Long employeeId, String month, String year) {
+    public List<TimesheetReponse> getTimesheetHistory(Long employeeId, String month, String year) {
         LocalDate baseDate;
         if (month == null || month.isBlank() || year == null || year.isBlank()) {
             baseDate = LocalDate.now();
@@ -53,33 +53,18 @@ public class TimesheetService {
         }
 
         LocalDateTime start = baseDate.atStartOfDay();
-        LocalDateTime end = baseDate.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
+        LocalDateTime end = LocalDateTime.now();
 
         Employee employeeRef = entityManager.getReference(Employee.class, employeeId);
 
-        Timesheet existing = timesheetRepository.findByEmployeeAndDateBetween(employeeRef, start, end)
+        return timesheetRepository.findByEmployeeAndDateBetween(employeeRef, start, end)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Timesheet doesn't exist for employee: " + employeeId));
-
-        String checkInStr = existing.getCheckIn() != null
-                ? existing.getCheckIn().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                : null;
-        String checkOutStr = existing.getCheckOut() != null
-                ? existing.getCheckOut().format(DateTimeFormatter.ofPattern("HH:mm:ss"))
-                : null;
-
-        return TimesheetReponse.builder()
-                .employeeId(existing.getEmployee().getId())
-                .date(existing.getDate().toLocalDate().toString())
-                .checkIn(checkInStr)
-                .checkOut(checkOutStr)
-                .totalHours(existing.getTotalHours())
-                .status(existing.getStatus())
-                .build();
+                .map(this::mapToResponse)
+                .toList();
     }
 
     // Check-in logic
+    @Transactional
     public CheckInResponse createTimesheet(CheckInRequest request) {
         WorkStatus checkInStatus = WorkStatus.ON_TIME;
         if (request.getTimestamp().toLocalTime().isAfter(DEADLINE_TIME)) {
@@ -106,6 +91,7 @@ public class TimesheetService {
     }
 
     // clock-out logic
+    @Transactional
     public ClockOutResponse updateTimesheet(ClockOutRequest request) {
         Employee employeeRef = entityManager.getReference(Employee.class, request.getEmployeeId());
         LocalDate day = request.getTimestamp().toLocalDate();
@@ -129,6 +115,18 @@ public class TimesheetService {
                 .message("Clock-out successful for employee: " + existing.getEmployee().getId())
                 .data(new ClockOutDataResponse(existing.getId(), checkOutTime, hoursWorked))
                 .build();
+    }
+
+    private TimesheetReponse mapToResponse(Timesheet timesheet) {
+        TimesheetReponse res = TimesheetReponse.builder()
+                .employeeId(timesheet.getEmployee().getId())
+                .date(timesheet.getDate().toLocalDate().toString())
+                .checkIn(timesheet.getCheckIn().toString())
+                .checkOut(timesheet.getCheckOut().toString())
+                .totalHours(timesheet.getTotalHours())
+                .status(timesheet.getStatus())
+                .build();
+        return res;
     }
 
 }
