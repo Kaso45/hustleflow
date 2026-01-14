@@ -1,31 +1,43 @@
 package com.hustleflow.ml.dto;
 
 public class MlPredictResponse {
-    private String prediction;
-    private String model_status;
-    private Integer received_features;
+    private Integer employeeId;
+    private String performanceScore;
+    private String reviewDate;
+    private String comments;
 
-    public String getPrediction() {
-        return prediction;
+    public MlPredictResponse() {
     }
 
-    public void setPrediction(String prediction) {
-        this.prediction = prediction;
+    public Integer getEmployeeId() {
+        return employeeId;
     }
 
-    public String getModel_status() {
-        return model_status;
+    public void setEmployeeId(Integer employeeId) {
+        this.employeeId = employeeId;
     }
 
-    public void setModel_status(String model_status) {
-        this.model_status = model_status;
+    public String getPerformanceScore() {
+        return performanceScore;
     }
 
-    public Integer getReceived_features() {
-        return received_features;
+    public void setPerformanceScore(String performanceScore) {
+        this.performanceScore = performanceScore;
     }
 
-    public void setReceived_features(Integer received_features) {
-        this.received_features = received_features;
+    public String getReviewDate() {
+        return reviewDate;
+    }
+
+    public void setReviewDate(String reviewDate) {
+        this.reviewDate = reviewDate;
+    }
+
+    public String getComments() {
+        return comments;
+    }
+
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

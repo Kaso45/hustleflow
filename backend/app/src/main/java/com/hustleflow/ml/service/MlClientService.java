@@ -19,6 +19,30 @@ public class MlClientService {
     }
 
     public MlPredictResponse predict(MlPredictRequest request) {
-        return restTemplate.postForObject(mlBaseUrl + "/predict", request, MlPredictResponse.class);
+        MlPredictResponse response = restTemplate.postForObject(mlBaseUrl + "/predict", request, MlPredictResponse.class);
+        if (response == null) {
+            return null;
+        }
+
+        response.setPerformanceScore(mapPerformanceScore(response.getPerformanceScore()));
+        return response;
+    }
+
+    private String mapPerformanceScore(String rawScore) {
+        if (rawScore == null) {
+            return null;
+        }
+
+        String value = rawScore.trim();
+        switch (value) {
+            case "0":
+                return "low";
+            case "1":
+                return "medium";
+            case "2":
+                return "good";
+            default:
+                return rawScore;
+        }
     }
 }

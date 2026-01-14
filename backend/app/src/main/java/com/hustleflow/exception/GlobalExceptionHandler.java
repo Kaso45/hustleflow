@@ -20,10 +20,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(MlServiceException.class)
+    public ResponseEntity<ErrorResponse> handleMlServiceException(MlServiceException ex) {
+        ErrorResponse error = new ErrorResponse(ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.BAD_GATEWAY);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntimeException(RuntimeException ex) {
         ErrorResponse error = new ErrorResponse(ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
-
