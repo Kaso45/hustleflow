@@ -1,4 +1,14 @@
 services:
+  fastapi:
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    container_name: hustleflow-fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - hustleflow-net
+
   db:
     image: postgres:17
     environment:
@@ -14,10 +24,13 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    networks:
+      - hustleflow-net
 
   be:
     build:
       context: ./app
+    container_name: hustleflow-backend
     ports:
       - "8080:8080"
     environment:
@@ -25,9 +38,18 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/${POSTGRES_DB_DEV}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER_DEV}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+      ML_SERVICE_BASE_URL: http://fastapi:8000
     depends_on:
+      fastapi:
+        condition: service_started
       db:
         condition: service_healthy
+    networks:
+      - hustleflow-net
 
 volumes:
   pgdata:
+
+networks:
+  hustleflow-net:
+    driver: bridge
