@@ -96,57 +96,63 @@
       </div>
     </FloatingTable>
 
-    <!-- FORM MODAL (Create/Edit) -->
-    <BaseModal 
-      :isOpen="showModal" 
-      :title="isEditing ? 'Edit Employee' : 'New Employee'" 
-      @close="closeModal"
-    >
-      <form @submit.prevent="handleSave" class="modal-form">
-        <!-- Name -->
-        <div class="form-group">
-          <label>Full Name</label>
-          <input v-model="formData.name" type="text" placeholder="e.g. Nguyen Van A" required />
-        </div>
+<BaseModal :isOpen="showModal" :title="isEditing ? 'Edit Employee' : 'New Employee'" @close="closeModal">
+  <form @submit.prevent="handleSave" class="modal-form">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input v-model="formData.name" type="text" placeholder="e.g. Nguyen Van A" required />
+    </div>
 
-        <!-- Department & Role Row -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Department</label>
-            <select v-model="formData.empDepartment" required>
-              <option disabled value="">Select Dept</option>
-              <option v-for="dept in departments" :key="dept.id" :value="dept.departmentName">
-                {{ dept.departmentName }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Job Role</label>
-            <input v-model="formData.empJobRole" type="text" placeholder="e.g. Developer" required />
-          </div>
-        </div>
+    <!-- Mở rộng: Thêm dòng Tuổi và Giới tính để tránh lỗi DB -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input v-model.number="formData.age" type="number" required />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select v-model="formData.gender" required>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
 
-        <!-- Level & Performance Row -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Level (1-5)</label>
-            <input v-model.number="formData.empJobLevel" type="number" min="1" max="5" />
-          </div>
-          <div class="form-group">
-            <label>Score (0-100)</label>
-            <input v-model.number="formData.performanceScore" type="number" min="0" max="100" />
-          </div>
-        </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Department</label>
+        <!-- Chuyển sang dùng ID để khớp với BE -->
+        <select v-model="formData.empDepartmentId" required>
+          <option :value="null">Select Dept</option>
+          <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            {{ dept.departmentName }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Job Role</label>
+        <input v-model="formData.empJobRole" type="text" required />
+      </div>
+    </div>
 
-        <!-- Action Buttons -->
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" @click="closeModal">Cancel</button>
-          <button type="submit" class="btn-submit">
-            {{ isEditing ? 'Update Changes' : 'Create Employee' }}
-          </button>
-        </div>
-      </form>
-    </BaseModal>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Level (1-5)</label>
+        <input v-model.number="formData.empJobLevel" type="number" min="1" max="5" />
+      </div>
+      <div class="form-group">
+        <label>Score (0-100)</label>
+        <input v-model.number="formData.performanceScore" type="number" min="0" max="100" />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" @click="closeModal">Cancel</button>
+      <button type="submit" class="btn-submit">{{ isEditing ? 'Update' : 'Create' }}</button>
+    </div>
+  </form>
+</BaseModal>
   </div>
 </template>
 
