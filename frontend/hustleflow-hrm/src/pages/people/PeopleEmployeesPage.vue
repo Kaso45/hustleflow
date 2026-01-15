@@ -1,3 +1,4 @@
+<!-- A:\Software Design Project Newest\hustleflow\frontend\hustleflow-hrm\src\pages\people\PeopleEmployeesPage.vue -->
 <template>
   <div class="page-container">
     <!-- Header -->
@@ -21,7 +22,8 @@
       </div>
       <div class="glass-card stat-card">
         <div class="stat-label">Avg Performance</div>
-        <div class="stat-value">82<span class="text-small">/100</span></div>
+        <!-- UPDATED: Tự động hiển thị điểm trung bình tính toán được -->
+        <div class="stat-value">{{ avgPerformance }}<span class="text-small">/100</span></div>
       </div>
     </div>
 
@@ -94,69 +96,75 @@
       </div>
     </FloatingTable>
 
-    <!-- FORM MODAL (Create/Edit) -->
-    <BaseModal 
-      :isOpen="showModal" 
-      :title="isEditing ? 'Edit Employee' : 'New Employee'" 
-      @close="closeModal"
-    >
-      <form @submit.prevent="handleSave" class="modal-form">
-        <!-- Name -->
-        <div class="form-group">
-          <label>Full Name</label>
-          <input v-model="formData.name" type="text" placeholder="e.g. Nguyen Van A" required />
-        </div>
+<BaseModal :isOpen="showModal" :title="isEditing ? 'Edit Employee' : 'New Employee'" @close="closeModal">
+  <form @submit.prevent="handleSave" class="modal-form">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input v-model="formData.name" type="text" placeholder="e.g. Nguyen Van A" required />
+    </div>
 
-        <!-- Department & Role Row -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Department</label>
-            <select v-model="formData.empDepartment" required>
-              <option disabled value="">Select Dept</option>
-              <option v-for="dept in departments" :key="dept.id" :value="dept.departmentName">
-                {{ dept.departmentName }}
-              </option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Job Role</label>
-            <input v-model="formData.empJobRole" type="text" placeholder="e.g. Developer" required />
-          </div>
-        </div>
+    <!-- Mở rộng: Thêm dòng Tuổi và Giới tính để tránh lỗi DB -->
+    <div class="form-row">
+      <div class="form-group">
+        <label>Age</label>
+        <input v-model.number="formData.age" type="number" required />
+      </div>
+      <div class="form-group">
+        <label>Gender</label>
+        <select v-model="formData.gender" required>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
 
-        <!-- Level & Performance Row -->
-        <div class="form-row">
-          <div class="form-group">
-            <label>Level (1-5)</label>
-            <input v-model.number="formData.empJobLevel" type="number" min="1" max="5" />
-          </div>
-          <div class="form-group">
-            <label>Score (0-100)</label>
-            <input v-model.number="formData.performanceScore" type="number" min="0" max="100" />
-          </div>
-        </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Department</label>
+        <!-- Chuyển sang dùng ID để khớp với BE -->
+        <select v-model="formData.empDepartmentId" required>
+          <option :value="null">Select Dept</option>
+          <option v-for="dept in departments" :key="dept.id" :value="dept.id">
+            {{ dept.departmentName }}
+          </option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Job Role</label>
+        <input v-model="formData.empJobRole" type="text" required />
+      </div>
+    </div>
 
-        <!-- Action Buttons -->
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" @click="closeModal">Cancel</button>
-          <button type="submit" class="btn-submit">
-            {{ isEditing ? 'Update Changes' : 'Create Employee' }}
-          </button>
-        </div>
-      </form>
-    </BaseModal>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Level (1-5)</label>
+        <input v-model.number="formData.empJobLevel" type="number" min="1" max="5" />
+      </div>
+      <div class="form-group">
+        <label>Score (0-100)</label>
+        <input v-model.number="formData.performanceScore" type="number" min="0" max="100" />
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn-cancel" @click="closeModal">Cancel</button>
+      <button type="submit" class="btn-submit">{{ isEditing ? 'Update' : 'Create' }}</button>
+    </div>
+  </form>
+</BaseModal>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { Pencil, Trash2 } from 'lucide-vue-next'; // Import Icon chuẩn
+import { Pencil, Trash2 } from 'lucide-vue-next'; 
 import dashboardService from '@/services/dashboard/dashboardService';
 import employeeService from '@/services/employeeService'; 
 import BaseAvatar from '@/components/common/BaseAvatar.vue';
 import PeoplePageHeader from '@/components/common/PeoplePageHeader.vue';
 import FloatingTable from '@/components/common/FloatingTable.vue';
-import BaseModal from '@/components/common/BaseModal.vue'; // Import Modal mới
+import BaseModal from '@/components/common/BaseModal.vue'; 
 
 // State
 const employees = ref([]);
@@ -188,7 +196,6 @@ const openAddModal = () => {
 
 const openEditModal = (emp) => {
   isEditing.value = true;
-  // Clone data vào form
   Object.assign(formData, { ...emp });
   showModal.value = true;
 };
@@ -202,14 +209,12 @@ const handleSave = async () => {
     if (isEditing.value) {
       // UPDATE Logic
       await employeeService.updateEmployee(formData.id, formData);
-      // Cập nhật UI local (Optimistic update)
       const index = employees.value.findIndex(e => e.id === formData.id);
       if (index !== -1) employees.value[index] = { ...formData };
       alert("Updated successfully!");
     } else {
       // CREATE Logic
       const res = await employeeService.createEmployee(formData);
-      // Giả sử API trả về object vừa tạo (hoặc mock trả về)
       const newEmp = res.data || { ...formData, id: Date.now() }; 
       employees.value.unshift(newEmp);
       alert("Created successfully!");
@@ -249,6 +254,19 @@ const fetchData = async () => {
 };
 
 // --- HELPERS ---
+
+// UPDATED: Tự động tính điểm trung bình (AVG Performance)
+const avgPerformance = computed(() => {
+  if (!employees.value || employees.value.length === 0) return 0;
+  
+  const totalScore = employees.value.reduce((sum, emp) => {
+    // API trả về có thể null hoặc undefined, chuyển về Number để tính
+    return sum + (Number(emp.performanceScore) || 0);
+  }, 0);
+
+  return Math.round(totalScore / employees.value.length);
+});
+
 const filteredEmployees = computed(() => {
   let result = employees.value;
   if (selectedDept.value) result = result.filter(e => e.empDepartment === selectedDept.value);
@@ -258,6 +276,7 @@ const filteredEmployees = computed(() => {
   }
   return result;
 });
+
 const generateEmail = (name) => name ? `${name.toLowerCase().replace(/\s/g, '.')}@hustleflow.com` : '';
 const getDeptClass = (deptName) => {
   const map = { 'Sales': 'badge-blue', 'HR': 'badge-purple', 'Engineering': 'badge-green', 'Finance': 'badge-orange', 'Marketing': 'badge-pink' };

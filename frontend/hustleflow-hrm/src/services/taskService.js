@@ -55,11 +55,8 @@ export const updateTask = async (id, data) => {
 };
 
 export const deleteTask = async (id) => {
-  if (USE_MOCK_API) {
-    mockTasks = mockTasks.filter(t => t.id !== id);
-    return { data: { success: true } };
-  }
   return apiClient.delete(`/tasks/${id}`);
 };
 
 export default { getTasks, createTask, updateTask, deleteTask };
+

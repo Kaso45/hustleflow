@@ -1,6 +1,6 @@
 <template>
   <div class="page-container">
-    <!-- Header -->
+    <!-- Header: GIỮ NGUYÊN -->
     <PeoplePageHeader 
       title="Contracts"
       subtitle="Manage employee contracts & agreements"
@@ -9,7 +9,7 @@
       @add="openAddModal"
     />
 
-    <!-- Stats -->
+    <!-- Stats: GIỮ NGUYÊN -->
     <div class="stats-grid">
       <div class="glass-card stat-card">
         <div class="stat-label">Active Contracts</div>
@@ -21,8 +21,7 @@
       </div>
     </div>
 
-    <!-- Table -->
-    <!-- Columns: Employee (2.5fr), Type (1.5fr), Duration (2fr), Salary (1.5fr), Status (1fr), Actions (100px) -->
+    <!-- Table: GIỮ NGUYÊN DESIGN -->
     <FloatingTable gridColumns="2.5fr 1.5fr 2fr 1.5fr 1fr 100px">
       <template #header>
         <div>Employee</div>
@@ -43,7 +42,6 @@
         class="row-card"
         :style="{ gridTemplateColumns: '2.5fr 1.5fr 2fr 1.5fr 1fr 100px' }"
       >
-        <!-- Employee Info (Mapped) -->
         <div class="col-info">
           <div v-if="getEmployee(contract.employeeId)" class="flex items-center gap-3">
             <BaseAvatar :name="getEmployee(contract.employeeId).name" :size="36" />
@@ -55,39 +53,28 @@
           <span v-else class="text-gray-400 italic">Unknown Employee</span>
         </div>
 
-        <!-- Type & File Link -->
         <div class="flex items-center gap-2">
           <span class="text-sm font-medium text-gray-700">{{ formatType(contract.contractType) }}</span>
-          <a 
-            v-if="contract.fileUrl" 
-            :href="contract.fileUrl" 
-            target="_blank" 
-            class="file-link"
-            title="View Contract File"
-          >
+          <a v-if="contract.fileUrl" :href="contract.fileUrl" target="_blank" class="file-link" title="View Contract File">
             <FileText :size="14" />
           </a>
         </div>
 
-        <!-- Duration -->
         <div class="text-sm text-gray-600">
           <div>{{ formatDate(contract.startDate) }}</div>
           <div class="text-xs text-gray-400">to {{ formatDate(contract.endDate) }}</div>
         </div>
 
-        <!-- Salary (Right Aligned) -->
         <div class="text-right pr-4 font-mono font-medium text-[#0b2433]">
           {{ formatCurrency(contract.baseSalary) }}
         </div>
 
-        <!-- Status -->
         <div>
           <span class="status-badge" :class="getStatusClass(contract.status)">
             {{ contract.status }}
           </span>
         </div>
 
-        <!-- Actions -->
         <div class="actions-group">
           <button class="icon-btn edit" @click.stop="openEditModal(contract)">
             <Pencil :size="16" />
@@ -99,16 +86,16 @@
       </div>
     </FloatingTable>
 
-    <!-- Modal Form -->
+    <!-- Modal Form: LOGIC UPDATE -->
     <BaseModal 
       :isOpen="showModal" 
       :title="isEditing ? 'Edit Contract' : 'New Contract'" 
       @close="closeModal"
     >
       <form @submit.prevent="handleSave" class="modal-form">
-        <!-- Employee Select -->
         <div class="form-group">
           <label>Employee</label>
+          <!-- Disable employee selection on Edit because backend doesn't support changing owner of a contract -->
           <select v-model="formData.employeeId" required :disabled="isEditing">
             <option :value="null">-- Select Employee --</option>
             <option v-for="emp in employees" :key="emp.id" :value="emp.id">
@@ -117,11 +104,11 @@
           </select>
         </div>
 
-        <!-- Contract Type & Status -->
         <div class="form-row">
           <div class="form-group">
             <label>Type</label>
-            <select v-model="formData.contractType">
+            <!-- Disable Type on Edit to match Backend Logic -->
+            <select v-model="formData.contractType" :disabled="isEditing">
               <option value="FULL_TIME">Full Time</option>
               <option value="PART_TIME">Part Time</option>
               <option value="INTERN">Internship</option>
@@ -139,31 +126,28 @@
           </div>
         </div>
 
-        <!-- Dates -->
         <div class="form-row">
           <div class="form-group">
             <label>Start Date</label>
-            <input v-model="formData.startDate" type="date" required />
+            <!-- Disable Start Date on Edit to match Backend Logic -->
+            <input v-model="formData.startDate" type="date" required :disabled="isEditing" />
           </div>
           <div class="form-group">
             <label>End Date</label>
-            <input v-model="formData.endDate" type="date" />
+            <input v-model="formData.endDate" type="date" required />
           </div>
         </div>
 
-        <!-- Salary -->
         <div class="form-group">
           <label>Base Salary (VND)</label>
           <input v-model.number="formData.baseSalary" type="number" min="0" step="100000" placeholder="e.g. 20000000" />
         </div>
 
-        <!-- File URL (Simulation) -->
         <div class="form-group">
           <label>File URL (Link)</label>
           <input v-model="formData.fileUrl" type="text" placeholder="/docs/contracts/..." />
         </div>
 
-        <!-- Footer -->
         <div class="form-actions">
           <button type="button" class="btn-cancel" @click="closeModal">Cancel</button>
           <button type="submit" class="btn-submit">
@@ -177,7 +161,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { Pencil, Trash2, FileText } from 'lucide-vue-next'; // Icon FileText cho hợp đồng
+import { Pencil, Trash2, FileText } from 'lucide-vue-next';
 import contractService from '@/services/contractService';
 import employeeService from '@/services/employeeService';
 import PeoplePageHeader from '@/components/common/PeoplePageHeader.vue';
@@ -185,15 +169,13 @@ import FloatingTable from '@/components/common/FloatingTable.vue';
 import BaseModal from '@/components/common/BaseModal.vue';
 import BaseAvatar from '@/components/common/BaseAvatar.vue';
 
-// State
 const contracts = ref([]);
 const employees = ref([]);
 const loading = ref(true);
 const searchQuery = ref('');
-
-// Modal
 const showModal = ref(false);
 const isEditing = ref(false);
+
 const formData = reactive({
   id: null,
   employeeId: null,
@@ -205,7 +187,6 @@ const formData = reactive({
   fileUrl: ''
 });
 
-// Fetch Data
 const fetchData = async () => {
   loading.value = true;
   try {
@@ -216,20 +197,20 @@ const fetchData = async () => {
     contracts.value = conRes.data || [];
     employees.value = empRes.data || [];
   } catch (err) {
-    console.error(err);
+    console.error("Fetch Error:", err);
   } finally {
     loading.value = false;
   }
 };
 
-// Computed Helpers
 const filteredContracts = computed(() => {
   if (!searchQuery.value) return contracts.value;
   const q = searchQuery.value.toLowerCase();
   return contracts.value.filter(c => {
     const emp = getEmployee(c.employeeId);
     const name = emp ? emp.name.toLowerCase() : '';
-    return name.includes(q) || c.contractType.toLowerCase().includes(q);
+    const type = c.contractType ? c.contractType.toLowerCase() : '';
+    return name.includes(q) || type.includes(q);
   });
 });
 
@@ -239,31 +220,16 @@ const totalSalary = computed(() => {
     .reduce((sum, c) => sum + Number(c.baseSalary || 0), 0);
 });
 
-// Utils
 const getEmployee = (id) => employees.value.find(e => e.id === id);
-
-const formatCurrency = (val) => {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
-};
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '--';
-  return new Date(dateStr).toLocaleDateString('vi-VN');
-};
-
-const formatType = (type) => type.replace('_', ' ');
+const formatCurrency = (val) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(val);
+const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleDateString('vi-VN') : '--';
+const formatType = (type) => type ? type.replace('_', ' ') : '';
 
 const getStatusClass = (status) => {
-  const map = {
-    'ACTIVE': 'st-active',
-    'PENDING': 'st-pending',
-    'EXPIRED': 'st-expired',
-    'TERMINATED': 'st-terminated'
-  };
+  const map = { 'ACTIVE': 'st-active', 'PENDING': 'st-pending', 'EXPIRED': 'st-expired', 'TERMINATED': 'st-terminated' };
   return map[status] || 'st-gray';
 };
 
-// Actions
 const openAddModal = () => {
   isEditing.value = false;
   Object.assign(formData, { id: null, employeeId: null, contractType: 'FULL_TIME', startDate: '', endDate: '', baseSalary: 0, status: 'ACTIVE', fileUrl: '' });
@@ -276,32 +242,43 @@ const openEditModal = (c) => {
   showModal.value = true;
 };
 
-const closeModal = () => showModal.value = false;
+const closeModal = () => { showModal.value = false; };
 
 const handleSave = async () => {
+  // Logic Validation: Check Dates
+  if (formData.endDate && new Date(formData.endDate) < new Date(formData.startDate)) {
+    alert("Error: End Date cannot be earlier than Start Date");
+    return;
+  }
+
   try {
     if (isEditing.value) {
-      await contractService.updateContract(formData.id, formData);
+      const res = await contractService.updateContract(formData.id, formData);
       const idx = contracts.value.findIndex(c => c.id === formData.id);
-      if (idx !== -1) contracts.value[idx] = { ...formData };
+      if (idx !== -1 && res.data) {
+        // Cập nhật bằng dữ liệu trả về từ server để đồng bộ tuyệt đối
+        contracts.value[idx] = res.data;
+      }
     } else {
       const res = await contractService.createContract(formData);
-      const newC = res.data || { ...formData, id: Date.now() };
-      contracts.value.unshift(newC);
+      if (res.data) {
+        contracts.value.unshift(res.data);
+      }
     }
     closeModal();
   } catch (e) {
-    alert("Error saving contract");
+    console.error(e);
+    alert(e.response?.data?.message || "Error saving contract. Please try again.");
   }
 };
 
 const handleDelete = async (id) => {
-  if (!confirm('Delete contract?')) return;
+  if (!confirm('Are you sure you want to delete this contract?')) return;
   try {
     await contractService.deleteContract(id);
     contracts.value = contracts.value.filter(c => c.id !== id);
   } catch (e) {
-    alert("Error deleting");
+    alert("Error deleting contract.");
   }
 };
 
@@ -309,40 +286,30 @@ onMounted(() => fetchData());
 </script>
 
 <style scoped>
-/* Common Page Styles */
+/* CSS GIỮ NGUYÊN HOÀN TOÀN NHƯ CŨ */
 .page-container { padding: 24px; background-color: #F3F7F9; min-height: 100vh; font-family: 'Inter', sans-serif; color: #0b2433; }
-
-/* Stats */
 .stats-grid { display: flex; gap: 16px; margin-bottom: 32px; }
 .glass-card { background: rgba(255, 255, 255, 0.92); border: 0.5px solid rgba(15, 118, 110, 0.12); box-shadow: 0 6px 18px rgba(10, 20, 36, 0.06); border-radius: 18px; padding: 20px 24px; min-width: 220px; }
 .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #94a3b8; margin-bottom: 8px; }
 .stat-value { font-size: 28px; font-weight: 700; color: #0b2433; }
 .text-accent { color: #5fd1c5; }
-
-/* Table Row */
 .row-card {
   display: grid; align-items: center; background: #ffffff; border-radius: 12px;
   padding: 16px 20px; box-shadow: 0 2px 6px rgba(10, 20, 36, 0.04); transition: all 0.2s ease;
   border: 1px solid transparent; gap: 10px;
 }
 .row-card:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(10, 20, 36, 0.08); border-color: rgba(95, 209, 197, 0.3); }
-
-/* File Link */
 .file-link {
   display: flex; align-items: center; justify-content: center;
   width: 24px; height: 24px; background: #e0f2fe; color: #0284c7;
   border-radius: 6px; transition: background 0.2s;
 }
 .file-link:hover { background: #bae6fd; }
-
-/* Status Badges */
 .status-badge { padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
 .st-active { background: #dcfce7; color: #16a34a; }
 .st-pending { background: #fef9c3; color: #ca8a04; }
 .st-expired { background: #f1f5f9; color: #64748b; }
 .st-terminated { background: #fee2e2; color: #ef4444; }
-
-/* Actions & Form */
 .actions-group { display: flex; justify-content: flex-end; gap: 8px; }
 .icon-btn {
   width: 32px; height: 32px; min-width: 32px; flex-shrink: 0;
@@ -353,8 +320,6 @@ onMounted(() => fetchData());
 .icon-btn.delete:hover { background: #fee2e2; color: #ef4444; }
 .text-right { text-align: right; }
 .state-msg { text-align: center; padding: 40px; color: #94a3b8; font-style: italic; }
-
-/* Modal Form Styles (Reused) */
 .modal-form { display: flex; flex-direction: column; gap: 16px; }
 .form-row { display: flex; gap: 16px; }
 .form-group { display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -365,6 +330,12 @@ onMounted(() => fetchData());
 }
 .form-group input:focus, .form-group select:focus {
   background: #fff; border-color: #5fd1c5; outline: none; box-shadow: 0 0 0 3px rgba(95,209,197,0.15);
+}
+/* Style cho các input bị disabled để user biết là không sửa được */
+.form-group input:disabled, .form-group select:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 .form-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px; }
 .btn-cancel { padding: 10px 20px; border-radius: 12px; font-weight: 600; color: #64748b; background: transparent; cursor: pointer; border: 1px solid transparent;}

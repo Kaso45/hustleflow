@@ -1,6 +1,5 @@
 <template>
   <div class="page-container">
-    <!-- Header và Grid Projects-->
     <PeoplePageHeader 
       title="Projects"
       subtitle="Gallery view of company initiatives"
@@ -10,40 +9,47 @@
     />
 
     <div class="filter-section">
-      <button class="filter-pill" :class="{ active: filterStatus === 'ALL' }" @click="filterStatus = 'ALL'">All</button>
-      <button class="filter-pill" :class="{ active: filterStatus === 'ACTIVE' }" @click="filterStatus = 'ACTIVE'">In Progress</button>
-      <button class="filter-pill" :class="{ active: filterStatus === 'PENDING' }" @click="filterStatus = 'PENDING'">Planning</button>
-      <button class="filter-pill" :class="{ active: filterStatus === 'COMPLETED' }" @click="filterStatus = 'COMPLETED'">Completed</button>
+      <button class="filter-pill" :class="{ active: filterStatus === 'ALL' }" @click="filterStatus = 'ALL'">All Projects</button>
+      <button class="filter-pill st-active-btn" :class="{ active: filterStatus === 'ACTIVE' }" @click="filterStatus = 'ACTIVE'">Active</button>
+      <button class="filter-pill st-pending-btn" :class="{ active: filterStatus === 'PENDING' }" @click="filterStatus = 'PENDING'">Pending</button>
+      <button class="filter-pill st-completed-btn" :class="{ active: filterStatus === 'COMPLETED' }" @click="filterStatus = 'COMPLETED'">Completed</button>
     </div>
 
-    <div v-if="loading" class="state-msg">Loading projects gallery...</div>
+    <div v-if="loading" class="state-msg">
+      <div class="loader"></div>
+      <p>Gathering projects...</p>
+    </div>
+    
     <div v-else class="project-grid">
-      <div 
-        v-for="proj in filteredProjects" 
-        :key="proj.id" 
-        class="project-card"
-        @click="openEditModal(proj)"
-      >
+      <div v-for="proj in filteredProjects" :key="proj.id" class="project-card" @click="openEditModal(proj)">
         <div class="card-cover" :style="{ background: getCoverGradient(proj.id) }"></div>
         <div class="card-body">
           <div class="header-separate">
-            <div class="icon-box-small"><Folder :size="20" stroke-width="2" /></div>
-            <span class="status-badge" :class="getStatusClass(proj.status)">{{ formatStatus(proj.status) }}</span>
+            <div class="icon-box-small"><Folder :size="18" stroke-width="2.5" /></div>
+            <span class="status-badge" :class="getStatusClass(proj.status)">{{ proj.status }}</span>
           </div>
-          <h3 class="proj-name" :title="proj.projectName">{{ proj.projectName }}</h3>
-          <div class="category-text">{{ proj.category || 'General' }}</div>
+          
+          <h3 class="proj-name">{{ proj.projectName }}</h3>
+          <p class="category-text">Internal Initiative • Design Team</p>
+          
           <div class="progress-section">
             <div class="progress-labels">
-              <span class="font-bold text-[#0b2433]">{{ calculateProgress(proj.id) }}%</span>
-              <span class="text-xs text-gray-400 font-medium">{{ getCompletedCount(proj.id) }}/{{ getTotalCount(proj.id) }} Tasks</span>
+              <span class="progress-percent">{{ calculateProgress(proj.id) }}%</span>
+              <span class="progress-count">{{ getCompletedCount(proj.id) }}/{{ getTotalCount(proj.id) }} Tasks</span>
             </div>
             <div class="progress-track">
               <div class="progress-fill" :style="{ width: calculateProgress(proj.id) + '%', background: getProgressColor(proj.status) }"></div>
             </div>
           </div>
+
           <div class="card-footer">
-            <div class="date-range"><Calendar :size="14" class="text-gray-400" /><span>{{ formatDate(proj.startDate) }}</span><span class="arrow">→</span><span>{{ formatDate(proj.endDate) }}</span></div>
-            <div class="manager-avatar"><BaseAvatar v-if="getEmployee(proj.managerId)" :name="getEmployee(proj.managerId).name" :size="24" /></div>
+            <div class="date-range">
+              <Calendar :size="14" />
+              <span>{{ formatDate(proj.startDate) }} — {{ formatDate(proj.endDate) }}</span>
+            </div>
+            <div class="manager-avatar">
+              <BaseAvatar v-if="getEmployee(proj.managerId)" :name="getEmployee(proj.managerId).name" :size="28" />
+            </div>
           </div>
         </div>
       </div>
@@ -51,103 +57,99 @@
 
     <div v-if="showModal" class="notion-modal-backdrop" @click.self="closeModal">
       <div class="notion-modal-content">
-        <!-- Cover -->
         <div class="modal-cover" :style="{ background: getCoverGradient(formData.id || 0) }">
-          <button class="close-btn" @click="closeModal"><X :size="18"/></button>
-        </div>
-
+      <button class="close-btn" @click="closeModal" aria-label="Close Modal" title="Close">
+        <X :size="20"/>
+      </button>
+    </div>
+<div class="icon-modal-fixed">
+      <div class="icon-large" title="Project Icon">
+        <Folder :size="36" stroke-width="2.5" />
+      </div>
+    </div>
         <div class="modal-body-scroll">
-          <div class="icon-modal-wrapper">
-             <div class="icon-large"><Folder :size="32" /></div>
-          </div>
-      
-          <div class="project-header">
-            <input v-model="formData.projectName" class="title-input" placeholder="Untitled Project" />
-            <div class="properties-grid">
-              <div class="prop-row">
-                <div class="prop-label"><User :size="16"/> Manager</div>
-                <div class="prop-value">
-                   <div class="prop-select-wrapper">
-                      <select v-model="formData.managerId" class="prop-select">
-                        <option :value="null">Unassigned</option>
-                        <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                      </select>
-                   </div>
-                </div>
+      <div class="project-header">
+        <input v-model="formData.projectName" class="title-input" placeholder="Untitled Project" aria-label="Project Title" />
+        
+        <div class="properties-grid">
+          <div class="prop-row">
+            <div class="prop-label"><User :size="15"/> Manager</div>
+            <div class="prop-value">
+              <div class="mini-assignee">
+                <BaseAvatar v-if="getEmployee(formData.managerId)" :name="getEmployee(formData.managerId).name" :size="22" />
+                <select v-model="formData.managerId" class="prop-select" aria-label="Select Manager">
+                  <option :value="null">Unassigned</option>
+                  <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
+                </select>
               </div>
+            </div>
+          </div>
+              
               <div class="prop-row">
-                <div class="prop-label"><Calendar :size="16"/> Timeline</div>
+                <div class="prop-label"><Calendar :size="15"/> Timeline</div>
                 <div class="prop-value date-group">
                   <input v-model="formData.startDate" type="date" class="prop-date"/>
-                  <span class="text-gray-400">→</span>
+                  <span class="sep">/</span>
                   <input v-model="formData.endDate" type="date" class="prop-date"/>
                 </div>
               </div>
+
+              <div class="prop-row">
+                <div class="prop-label"><Activity :size="15"/> Status</div>
+                <div class="prop-value">
+                   <select v-model="formData.status" class="prop-select-status" :class="formData.status">
+                     <option value="ACTIVE">Active</option>
+                     <option value="PENDING">Pending</option>
+                     <option value="COMPLETED">Completed</option>
+                   </select>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="divider"></div>
           <div class="tasks-section">
-            <div class="section-top">
-              <div class="section-title">Tasks</div>
-              <div class="section-subtitle">Manage project tasks & progress</div>
-            </div>
-
+            <h4 class="section-title">Project Tasks</h4>
             <div class="notion-table">
               <div class="nt-header">
-                <div class="nth-status">Status</div>
-                <div class="nth-name">Task Name</div>
-                <div class="nth-assignee">Assigned to</div>
-                <div class="nth-priority">Priority</div>
-                <div class="nth-deadline">Deadline</div>
-                <div class="nth-action"></div>
+                <div>Status</div>
+                <div>Task Name</div>
+                <div>Assignee</div>
+                <div>Priority</div>
+                <div>Deadline</div>
+                <div style="text-align: right;"></div>
               </div>
 
-              <div v-for="task in projectTasks" :key="task.id" class="nt-row group">
-                <div class="nt-cell cell-status">
-                  <select v-model="task.status" @change="updateTask(task)" class="status-select" :class="task.status">
+              <div v-for="task in projectTasks" :key="task.id" class="nt-row">
+                <div class="nt-cell">
+                  <select v-model="task.status" @change="updateTask(task)" class="task-status-pill" :class="task.status">
                     <option value="TODO">To Do</option>
-                    <option value="IN_PROGRESS">In Progress</option>
-                    <option value="DONE">Done</option>
+                    <option value="COMPLETED">Done</option>
+                    <option value="CANCELLED">Cancel</option>
                   </select>
                 </div>
-                <div class="nt-cell cell-name">
-                  <input v-model="task.title" class="nt-input" placeholder="Type a name..." @blur="updateTask(task)"/>
-                </div>
-                <div class="nt-cell cell-assignee">
-                   <div class="assignee-display">
-                      <BaseAvatar v-if="getEmployee(task.assigneeId)" :name="getEmployee(task.assigneeId).name" :size="22" />
-                      <select v-model="task.assigneeId" @change="updateTask(task)" class="assignee-select-full">
-                        <option :value="null">Unassigned</option>
-                        <option v-for="emp in employees" :key="emp.id" :value="emp.id">{{ emp.name }}</option>
-                      </select>
-                      <span class="assignee-text">{{ getEmployee(task.assigneeId)?.name || 'Empty' }}</span>
+                <div class="nt-cell font-medium">{{ task.title }}</div>
+                <div class="nt-cell">
+                   <div class="mini-assignee">
+                      <BaseAvatar v-if="getEmployee(task.assigneeId)" :name="getEmployee(task.assigneeId).name" :size="20" />
+                      <span>{{ getEmployee(task.assigneeId)?.name || 'N/A' }}</span>
                    </div>
                 </div>
-                <div class="nt-cell cell-priority">
-                   <select v-model="task.priority" @change="updateTask(task)" class="priority-badge" :class="task.priority">
-                    <option value="LOW">Low</option>
-                    <option value="MEDIUM">Medium</option>
-                    <option value="HIGH">High</option>
-                  </select>
+                <div class="nt-cell">
+                  <span class="prio-tag" :class="task.priority">{{ task.priority }}</span>
                 </div>
-                <div class="nt-cell cell-deadline">
-                  <input v-model="task.deadline" type="date" class="date-input-mini" @change="updateTask(task)"/>
-                </div>
-                <div class="nt-cell cell-action">
-                   <button class="delete-mini" @click="deleteTask(task.id)"><Trash2 :size="14"/></button>
+                <div class="nt-cell date-cell">{{ formatDate(task.deadline) }}</div>
+                <div class="nt-cell" style="justify-content: flex-end;">
+                  <button class="delete-mini" @click="deleteTask(task.id)"><Trash2 :size="14"/></button>
                 </div>
               </div>
-
-              <!-- Add New -->
-              <div class="nt-new-row" @click="addNewTask">
-                <Plus :size="14" /> New task
+              <div class="nt-add-btn" @click="addNewTask">
+                <Plus :size="16" /> Add a task
               </div>
             </div>
           </div>
           
-          <div class="modal-footer">
-            <button class="save-btn" @click="handleSaveProject">Save Project</button>
+          <div class="modal-footer-sticky">
+            <button class="save-btn" @click="handleSaveProject">Update Project Information</button>
           </div>
         </div>
       </div>
@@ -157,14 +159,13 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue';
-import { Folder, Calendar, Trash2, X, User, Activity, Check, Plus } from 'lucide-vue-next';
+import { Folder, Calendar, Trash2, X, User, Plus, Activity } from 'lucide-vue-next';
 import projectService from '@/services/projectService';
 import taskService from '@/services/taskService';
 import employeeService from '@/services/employeeService';
 import PeoplePageHeader from '@/components/common/PeoplePageHeader.vue';
 import BaseAvatar from '@/components/common/BaseAvatar.vue';
 
-// State
 const projects = ref([]);
 const employees = ref([]);
 const allTasks = ref([]);
@@ -174,237 +175,634 @@ const searchQuery = ref('');
 const filterStatus = ref('ALL');
 const showModal = ref(false);
 const isEditing = ref(false);
-const formData = reactive({ id: null, projectName: '', category: 'General', startDate: '', endDate: '', status: 'ACTIVE', managerId: null });
+
+const hiddenTasks = ref(JSON.parse(localStorage.getItem('hidden_tasks') || '[]'));
+const hiddenProjects = ref(JSON.parse(localStorage.getItem('hidden_projects') || '[]'));
+
+const formData = reactive({
+  id: null,
+  projectName: '',
+  description: '',
+  startDate: '',
+  endDate: '',
+  status: 'ACTIVE',
+  managerId: null
+});
 
 const fetchData = async () => {
   loading.value = true;
-  const [pRes, eRes, tRes] = await Promise.all([
-    projectService.getProjects(),
-    employeeService.getEmployees(),
-    taskService.getTasks()
-  ]);
-  projects.value = pRes.data || [];
-  employees.value = eRes.data || [];
-  allTasks.value = tRes.data || [];
+  try {
+    const [pRes, eRes, tRes] = await Promise.all([
+      projectService.getProjects(),
+      employeeService.getEmployees(),
+      taskService.getTasks()
+    ]);
+    projects.value = pRes.data || [];
+    employees.value = eRes.data || [];
+    allTasks.value = (tRes.data || []).filter(t => !hiddenTasks.value.includes(t.id));
+  } catch (e) {}
   loading.value = false;
 };
 
-const getEmployee = (id) => employees.value.find(e => e.id === id);
-const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-GB', {day:'numeric', month:'short'}) : '--';
-const formatStatus = (s) => s === 'ACTIVE' ? 'In Progress' : s.charAt(0) + s.slice(1).toLowerCase();
-const getStatusClass = (s) => (s === 'ACTIVE' ? 'st-active' : s === 'COMPLETED' ? 'st-completed' : 'st-gray');
-const getProgressColor = (s) => s === 'COMPLETED' ? '#3b82f6' : '#5fd1c5';
-const getCoverGradient = (id) => {
-  const gradients = ['linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)', 'linear-gradient(120deg, #a18cd1 0%, #fbc2eb 100%)', 'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)', 'linear-gradient(120deg, #fccb90 0%, #d57eeb 100%)', 'linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)'];
-  return gradients[(id || 0) % gradients.length];
-};
+const getProjectTasksList = (pid) =>
+  allTasks.value.filter(t => Number(t.projectId) === Number(pid));
 
-const getProjectTasks = (pid) => allTasks.value.filter(t => t.projectId === pid);
-const getTotalCount = (pid) => getProjectTasks(pid).length;
-const getCompletedCount = (pid) => getProjectTasks(pid).filter(t => t.status === 'DONE').length;
+const getTotalCount = (pid) => getProjectTasksList(pid).length;
+
+const getCompletedCount = (pid) =>
+  getProjectTasksList(pid).filter(t => t.status === 'COMPLETED').length;
+
 const calculateProgress = (pid) => {
   const total = getTotalCount(pid);
-  if (total === 0) return 0;
-  return Math.round((getCompletedCount(pid) / total) * 100);
+  return total === 0 ? 0 : Math.round((getCompletedCount(pid) / total) * 100);
+};
+
+const handleSaveProject = async () => {
+  try {
+    const payload = {
+      projectName: formData.projectName,
+      description: formData.description || '',
+      startDate: formData.startDate,
+      endDate: formData.endDate,
+      status: formData.status,
+      managerId: Number(formData.managerId)
+    };
+
+    if (isEditing.value) {
+      const res = await projectService.updateProject(formData.id, payload);
+      const idx = projects.value.findIndex(p => p.id === formData.id);
+      if (idx !== -1) projects.value[idx] = res.data;
+    } else {
+      const res = await projectService.createProject(payload);
+      projects.value.unshift(res.data);
+      formData.id = res.data.id;
+      isEditing.value = true;
+    }
+  } catch (e) {}
+};
+
+const updateTask = async (task) => {
+  try {
+    const res = await taskService.updateTask(task.id, {
+      status: task.status,
+      completionNote: ''
+    });
+    const idx = allTasks.value.findIndex(t => t.id === task.id);
+    if (idx !== -1) allTasks.value[idx].status = res.data.status;
+  } catch (e) {}
+};
+
+const addNewTask = async () => {
+  if (!formData.id) return;
+  try {
+    const res = await taskService.createTask({
+      projectId: Number(formData.id),
+      assigneeId: Number(formData.managerId || employees.value[0]?.id),
+      title: 'New Task',
+      description: '',
+      deadline: new Date().toISOString(),
+      priority: 'MEDIUM',
+      status: 'TODO'
+    });
+    projectTasks.value.push(res.data);
+    allTasks.value.push(res.data);
+  } catch (e) {}
+};
+
+const deleteTask = (id) => {
+  if (!confirm('Delete this task?')) return;
+
+  projectTasks.value = projectTasks.value.filter(t => t.id !== id);
+  allTasks.value = allTasks.value.filter(t => t.id !== id);
+
+  if (!hiddenTasks.value.includes(id)) {
+    hiddenTasks.value.push(id);
+    localStorage.setItem('hidden_tasks', JSON.stringify(hiddenTasks.value));
+  }
+
+  try { taskService.deleteTask(id); } catch (e) {}
+};
+
+const deleteProject = (id) => {
+  if (!confirm('Delete project?')) return;
+  if (!hiddenProjects.value.includes(id)) {
+    hiddenProjects.value.push(id);
+    localStorage.setItem('hidden_projects', JSON.stringify(hiddenProjects.value));
+  }
 };
 
 const openAddModal = () => {
   isEditing.value = false;
-  Object.assign(formData, { id: null, projectName: '', category: 'General', startDate: '', endDate: '', status: 'ACTIVE', managerId: null });
+  Object.assign(formData, {
+    id: null,
+    projectName: '',
+    description: '',
+    startDate: '',
+    endDate: '',
+    status: 'ACTIVE',
+    managerId: null
+  });
   projectTasks.value = [];
   showModal.value = true;
 };
+
 const openEditModal = async (proj) => {
   isEditing.value = true;
-  Object.assign(formData, { ...proj });
-  const res = await taskService.getTasks({ projectId: proj.id });
-  projectTasks.value = res.data || [];
+  Object.assign(formData, proj);
+  try {
+    const res = await taskService.getTasks({ projectId: proj.id });
+    projectTasks.value = (res.data || []).filter(
+      t => !hiddenTasks.value.includes(t.id)
+    );
+  } catch (e) {}
   showModal.value = true;
 };
+
 const closeModal = () => showModal.value = false;
-const handleSaveProject = async () => {
-  if (isEditing.value) {
-    await projectService.updateProject(formData.id, formData);
-    const idx = projects.value.findIndex(p => p.id === formData.id);
-    if (idx !== -1) projects.value[idx] = { ...formData };
-  } else {
-    const res = await projectService.createProject(formData);
-    projects.value.unshift(res.data);
-  }
-  closeModal();
-};
 
-const updateTask = async (task) => {
-  await taskService.updateTask(task.id, {
-    status: task.status, title: task.title, assigneeId: task.assigneeId, priority: task.priority, deadline: task.deadline
-  });
-  // Sync global
-  const idx = allTasks.value.findIndex(t => t.id === task.id);
-  if (idx !== -1) allTasks.value[idx] = { ...task };
-};
+const getEmployee = (id) => employees.value.find(e => e.id === id);
 
-const addNewTask = async () => {
-  if (!formData.id && !isEditing.value) { alert("Please save the project first."); return; }
-  const newTask = {
-    projectId: formData.id,
-    title: "", status: 'TODO', priority: 'MEDIUM', deadline: new Date().toISOString().split('T')[0], assigneeId: null, progress: 0
-  };
-  const res = await taskService.createTask(newTask);
-  projectTasks.value.push(res.data);
-  allTasks.value.push(res.data);
-};
+const formatDate = (d) =>
+  d ? new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '--';
 
-const deleteTask = async (id) => {
-  if (!confirm("Delete task?")) return;
-  await taskService.deleteTask(id);
-  projectTasks.value = projectTasks.value.filter(t => t.id !== id);
-  allTasks.value = allTasks.value.filter(t => t.id !== id);
+const getStatusClass = (s) =>
+  s === 'ACTIVE' ? 'st-active' : s === 'COMPLETED' ? 'st-completed' : 'st-gray';
+
+const getProgressColor = (s) =>
+  s === 'COMPLETED' ? '#B5EAD7' : '#A0D2EB';
+
+const getCoverGradient = (id) => {
+  const gradients = [
+    'linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%)',
+    'linear-gradient(135deg, #FBC2EB 0%, #A6C1EE 100%)',
+    'linear-gradient(135deg, #84FAB0 0%, #8FD3F4 100%)',
+    'linear-gradient(135deg, #A1C4FD 0%, #C2E9FB 100%)',
+    'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)'
+  ];
+  return gradients[(id || 0) % gradients.length];
 };
 
 const filteredProjects = computed(() => {
-  let result = projects.value;
-  if (filterStatus.value !== 'ALL') result = result.filter(p => p.status === filterStatus.value);
-  if (searchQuery.value) result = result.filter(p => p.projectName.toLowerCase().includes(searchQuery.value.toLowerCase()));
+  let result = projects.value.filter(p => !hiddenProjects.value.includes(p.id));
+  if (filterStatus.value !== 'ALL')
+    result = result.filter(p => p.status === filterStatus.value);
+  if (searchQuery.value)
+    result = result.filter(p =>
+      p.projectName.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
   return result;
 });
-onMounted(() => fetchData());
+
+onMounted(fetchData);
 </script>
 
+
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-
-
-.notion-modal-backdrop { 
-  position: fixed; 
-  inset: 0; 
-  width: 100vw;
-  height: 100vh;
-  background: rgba(15, 23, 42, 0.5); 
-  backdrop-filter: blur(4px); 
-  z-index: 9999; /* Ensure it is ABOVE Sidebar */
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
+.page-container {
+  padding: 32px;
+  background-color: #f9fbfd;
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #2d3436;
+  letter-spacing: -0.01em;
 }
 
-.notion-modal-content { 
-  background: #fff; 
-  width: 90%; 
-  max-width: 900px; 
-  height: 90vh; 
-  border-radius: 12px; 
-  box-shadow: 0 20px 50px rgba(0,0,0,0.3); 
-  overflow: hidden; 
-  display: flex; 
-  flex-direction: column; 
-  position: relative;
-  /* Reset margin just in case */
-  margin: 0; 
+/* Filters */
+.filter-section {
+  display: flex;
+  gap: 12px;
+  margin: 24px 0 32px;
 }
 
+.filter-pill {
+  border: 1px solid transparent;
+  background: #fff;
+  padding: 8px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #636e72;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
 
-.modal-cover { height: 130px; width: 100%; position: relative; z-index: 1; flex-shrink: 0;}
+.filter-pill:hover {
+  background: #f1f2f6;
+  transform: translateY(-1px);
+}
 
-.icon-modal-wrapper { 
-  position: relative;
-  z-index: 10; /* Important: On Top of Cover */
-  margin-top: 10px; /* Push up into Cover */
-  margin-left: 2px;
+.filter-pill.active {
+  background: #2d3436;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(45, 52, 54, 0.15);
+}
+
+/* Project Grid */
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+.project-card {
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+  cursor: pointer;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.07);
+}
+
+.card-cover {
+  height: 100px;
+  opacity: 0.85;
+}
+
+.card-body {
+  padding: 24px;
+  flex: 1;
+}
+
+.header-separate {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.icon-box-small {
+  background: #f1f2f6;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #636e72;
+}
+
+.proj-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #2d3436;
+  line-height: 1.4;
+  margin-bottom: 4px;
+}
+
+.category-text {
+  font-size: 13px;
+  color: #b2bec3;
   margin-bottom: 24px;
 }
 
-.icon-large { 
-  background: #fff; width: 72px; height: 72px; border-radius: 12px; 
-  display: flex; align-items: center; justify-content: center; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.12); 
-  color: #333;
+/* Progress Section */
+.progress-section {
+  margin-bottom: 24px;
 }
 
-/* 3. SCROLL AREA FIX */
-.modal-body-scroll { 
-  flex: 1; 
-  overflow-y: auto; 
-  padding: 0 40px 40px 40px; 
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 8px;
+}
+
+.progress-percent {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d3436;
+}
+
+.progress-count {
+  font-size: 11px;
+  font-weight: 600;
+  color: #b2bec3;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.progress-track {
+  background: #f1f2f6;
+  height: 8px;
+  border-radius: 10px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Card Footer */
+.card-footer {
+  padding-top: 16px;
+  border-top: 1px solid #f1f2f6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #636e72;
+}
+
+/* Notion Modal UI */
+.notion-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(45, 52, 54, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.notion-modal-content {
   background: #fff;
-  /* Add z-index to content background to prevent transparency issues */
+  width: 95%;
+  max-width: 860px;
+  height: 85vh;
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  position: relative; /* Bắt buộc để icon absolute theo nó */
+  overflow: hidden;
+}
+
+.modal-cover {
+  height: 160px;
+  width: 100%;
+  z-index: 1;
+}
+
+.close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.icon-modal-fixed {
+  position: absolute;
+  top: 120px;    /* Đẩy icon đè lên giữa đường kẻ của Cover (Cover 160px - Icon 80px/2) */
+  left: 60px;    /* Khoảng cách lề trái */
+  z-index: 100;  /* Luôn luôn nằm trên cùng */
+}
+.modal-body-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 60px 60px 40px; /* Top padding 60px để nội dung không dính vào icon absolute */
+  z-index: 5;
+}
+.icon-modal-wrapper {
   position: relative;
-  z-index: 2; 
+  display: inline-block;
+  margin-top: -42px;   
+  z-index: 50;        
+  pointer-events: none; 
+}
+.icon-large {
+  background: #fff;
+  width: 82px;
+  height: 82px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #fff; /* Viền trắng tách biệt icon với nền */
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  color: #2d3436;
+}
+.title-input {
+  font-size: 40px;
+  font-weight: 800;
+  border: none;
+  outline: none;
+  width: 100%;
+  color: #2d3436;
+  letter-spacing: -0.03em;
+  margin-bottom: 32px;
 }
 
-/* Close Button positioning relative to modal content */
-.close-btn { 
-  position: absolute; top: 12px; right: 12px; 
-  background: rgba(255,255,255,0.4); 
-  border: none; padding: 6px; border-radius: 6px; cursor: pointer; z-index: 20; 
+/* Properties Grid */
+.properties-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 40px;
 }
-.close-btn:hover { background: #fff; }
 
-/* ------ REST OF STYLES (Tables, Fonts...) same as before ------ */
-.page-container { padding: 24px; background-color: #F3F7F9; min-height: 100vh; font-family: 'Inter', sans-serif; color: #0b2433; }
-.filter-section { display: flex; gap: 10px; margin-bottom: 24px; }
-.filter-pill { border: none; background: transparent; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer; }
-.filter-pill:hover { background: rgba(95, 209, 197, 0.1); color: #0f766e; }
-.filter-pill.active { background: #fff; color: #0b2433; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-.state-msg { text-align: center; padding: 40px; color: #94a3b8; font-style: italic; }
+.prop-row {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+}
 
-/* Grid Cards */
-.project-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-.project-card { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(10, 20, 36, 0.04); cursor: pointer; transition: all 0.3s; border: 1px solid rgba(0,0,0,0.03); display: flex; flex-direction: column; }
-.project-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(10, 20, 36, 0.08); }
-.card-cover { height: 90px; width: 100%; opacity: 0.9; }
-.card-body { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-.header-separate { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px; margin-bottom: 8px; }
-.icon-box-small { background: #f1f5f9; color: #0b2433; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
-.proj-name { font-size: 16px; font-weight: 700; color: #0b2433; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.category-text { font-size: 11px; color: #64748b; font-weight: 500; background: #f8fafc; padding: 2px 8px; border-radius: 4px; display: inline-block; align-self: flex-start; }
-.status-badge { padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; text-transform: uppercase; background: #fff; border: 1px solid #f1f5f9; }
-.st-active { color: #0284c7; background: #e0f2fe; border-color: #bae6fd; } 
-.st-completed { color: #16a34a; background: #dcfce7; border-color: #bbf7d0; } 
-.st-gray { color: #64748b; }
-.progress-section { margin-top: auto; padding-top: 12px; }
-.progress-labels { display: flex; justify-content: space-between; margin-bottom: 4px; align-items: flex-end; }
-.progress-track { background: #f1f5f9; height: 6px; border-radius: 10px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 10px; transition: width 0.5s ease; }
-.card-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 14px; border-top: 1px solid #f1f5f9; margin-top: 12px; }
-.date-range { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; font-weight: 500; }
+.prop-label {
+  width: 140px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #b2bec3;
+  font-size: 14px;
+  font-weight: 500;
+}
 
-/* Task Table Inside Modal */
-.project-header { margin-bottom: 32px; }
-.title-input { font-size: 36px; font-weight: 700; color: #0b2433; border: none; width: 100%; outline: none; margin-bottom: 24px; background: transparent; line-height: 1.2; }
-.title-input::placeholder { color: #e2e8f0; }
-.properties-grid { display: grid; gap: 8px; max-width: 600px; }
-.prop-row { display: grid; grid-template-columns: 140px 1fr; align-items: center; min-height: 34px; }
-.prop-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; }
-.prop-select-wrapper select, .prop-date { padding: 4px 8px; border-radius: 4px; background: transparent; border: 1px solid transparent; font-size: 14px; cursor: pointer; color: #334155; }
-.prop-select-wrapper select:hover, .prop-date:hover { background: #f1f5f9; }
-.divider { height: 1px; background: #e2e8f0; margin: 32px 0; }
-.section-top { margin-bottom: 16px; }
-.section-title { font-size: 20px; font-weight: 700; color: #0b2433; }
-.section-subtitle { font-size: 13px; color: #64748b; margin-top: 4px; }
-.notion-table { border: 1px solid #e2e8f0; border-radius: 6px; overflow: visible; }
-.nt-header { display: grid; grid-template-columns: 130px 2fr 1.5fr 100px 140px 40px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 12px; font-weight: 600; color: #64748b; }
-.nth-status, .nth-name, .nth-assignee, .nth-priority, .nth-deadline, .nth-action { padding: 10px 12px; display: flex; align-items: center; border-right: 1px solid #f1f5f9; }
-.nt-row { display: grid; grid-template-columns: 130px 2fr 1.5fr 100px 140px 40px; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
-.nt-row:hover { background: #fbfcff; }
-.nt-cell { padding: 6px 12px; display: flex; align-items: center; border-right: 1px solid transparent; position: relative; }
-.nt-row:hover .nt-cell { border-right-color: #f1f5f9; }
-.status-select { width: 100%; border-radius: 4px; padding: 4px 8px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; appearance: none; text-align: center; }
-.status-select.TODO { background: #fef9c3; color: #854d0e; }
-.status-select.IN_PROGRESS { background: #e0f2fe; color: #0369a1; }
-.status-select.DONE { background: #dcfce7; color: #15803d; }
-.nt-input { width: 100%; border: none; background: transparent; outline: none; font-size: 14px; }
-.assignee-display { display: flex; align-items: center; gap: 8px; width: 100%; position: relative; }
-.assignee-select-full { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.assignee-text { font-size: 13px; color: #334155; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.priority-badge { border: none; border-radius: 4px; padding: 2px 6px; font-size: 12px; font-weight: 500; width: 100%; cursor: pointer; }
-.priority-badge.HIGH { background: #fee2e2; color: #991b1b; }
-.priority-badge.MEDIUM { background: #ffedd5; color: #9a3412; }
-.priority-badge.LOW { background: #f3f4f6; color: #374151; }
-.date-input-mini { border: none; background: transparent; font-size: 13px; color: #475569; width: 100%; }
-.delete-mini { border: none; background: transparent; color: #cbd5e1; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 100%; }
-.delete-mini:hover { color: #ef4444; }
-.nt-new-row { padding: 10px 12px; display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 13px; cursor: pointer; }
-.nt-new-row:hover { background: #f8fafc; color: #334155; }
-.modal-footer { margin-top: 32px; display: flex; justify-content: flex-end; }
-.save-btn { background: #0b2433; color: white; border: none; padding: 8px 24px; border-radius: 8px; font-weight: 600; cursor: pointer; }
+.prop-value {
+  flex: 1;
+}
+
+.prop-select, .prop-date {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none; /* Fix lỗi UI select trên Safari/Chrome Android */
+  border: none;
+  background: transparent;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3436;
+  cursor: pointer;
+  
+}
+
+.prop-select:hover, .prop-date:hover {
+  background: #f1f2f6;
+}
+
+.prop-select-status {
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  border: none;
+  text-transform: uppercase;
+}
+
+/* Status Pastel Colors */
+.status-badge {
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.st-active, .ACTIVE { background: #E3F2FD; color: #1976D2; }
+.st-completed, .COMPLETED { background: #E8F5E9; color: #2E7D32; }
+.st-gray, .PENDING { background: #FFF3E0; color: #EF6C00; }
+
+/* Notion Table */
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #b2bec3;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f1f2f6;
+}
+
+.notion-table {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #f1f2f6;
+}
+
+.nt-header {
+  display: grid;
+  grid-template-columns: 120px 1.5fr 1fr 100px 110px 40px;
+  padding: 12px 16px;
+  background: #fafbfc;
+  font-size: 12px;
+  font-weight: 700;
+  color: #b2bec3;
+}
+
+.nt-row {
+  display: grid;
+  grid-template-columns: 120px 1.5fr 1fr 100px 110px 40px;
+  padding: 12px 16px;
+  align-items: center;
+  border-top: 1px solid #f1f2f6;
+  transition: background 0.2s;
+}
+
+.nt-row:hover {
+  background: #fafbfc;
+}
+
+.task-status-pill {
+  border: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.TODO { background: #f1f2f6; color: #636e72; }
+.CANCELLED { background: #ffebee; color: #c62828; }
+
+.prio-tag {
+  font-size: 10px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.HIGH { color: #d63031; background: #fab1a022; }
+.MEDIUM { color: #e67e22; background: #fde6d2; }
+.LOW { color: #00b894; background: #55efc422; }
+
+.nt-add-btn {
+  padding: 12px 16px;
+  color: #b2bec3;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nt-add-btn:hover {
+  background: #f1f2f6;
+  color: #636e72;
+}
+
+.modal-footer-sticky {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.save-btn {
+  background: #2d3436;
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(45, 52, 54, 0.2);
+}
+
+.delete-mini {
+  background: transparent;
+  border: none;
+  color: #dfe6e9;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nt-row:hover .delete-mini {
+  color: #ff7675;
+}
+
+.mini-assignee {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Dãn cách 12px chuẩn pastel */
+}
+
+/* Đảm bảo chữ assignee không bị dính */
+.mini-assignee span {
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d3436;
+}
 </style>
