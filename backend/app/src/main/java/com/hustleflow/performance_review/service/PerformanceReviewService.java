@@ -63,6 +63,13 @@ public class PerformanceReviewService {
                 .comments(mlResponse.getComments())
                 .build();
 
+        // Map ML score to current employee performanceRating: 0=low, 1=medium, 2=high
+        Integer rating = mapScoreToRating(mlResponse.getPerformanceScore());
+        if (rating != null) {
+            employee.setPerformanceRating(rating);
+            employeeRepository.save(employee);
+        }
+
         PerformanceReview saved = performanceReviewRepository.save(review);
         return toResponse(saved);
     }
@@ -98,7 +105,6 @@ public class PerformanceReviewService {
         features.put("Gender", employee.getGender());
         features.put("Age", employee.getAge());
         features.put("EducationBackground", employee.getEducationBackground());
-        features.put("PerformanceScore", employee.getPerformanceScore());
         features.put("OverTime", employee.getOverTime());
         features.put("NumCompaniesWorked", employee.getNumCompaniesWorked());
         features.put("EmpJobLevel", employee.getEmpJobLevel());
@@ -124,5 +130,27 @@ public class PerformanceReviewService {
         features.put("PerformanceRating", employee.getPerformanceRating());
 
         return features;
+    }
+
+    private Integer mapScoreToRating(String score) {
+        if (score == null)
+            return null;
+        String s = score.trim().toUpperCase();
+        switch (s) {
+            case "LOW":
+                return 0;
+            case "MEDIUM":
+                return 1;
+            case "HIGH":
+                return 2;
+            default:
+                try {
+                    int n = Integer.parseInt(s);
+                    if (n >= 0 && n <= 2)
+                        return n;
+                } catch (NumberFormatException ignored) {
+                }
+                return null;
+        }
     }
 }

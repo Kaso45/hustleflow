@@ -1,9 +1,11 @@
 package com.hustleflow.employee.dto;
 
+import com.hustleflow.employee.enums.MaritalStatus;
+import com.hustleflow.employee.enums.TravelFrequency;
+
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-// department is optional now; it can be null on create/update
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
@@ -20,10 +22,6 @@ public class EmployeeCreateRequest {
     private Integer age;
 
     private String educationBackground;
-
-    @Min(value = 0, message = "performanceScore must be >= 0")
-    @Max(value = 100, message = "performanceScore must be <= 100")
-    private Integer performanceScore;
 
     private Boolean overTime;
 
@@ -49,9 +47,9 @@ public class EmployeeCreateRequest {
     @Max(value = 5, message = "empEnvironmentSatisfaction must be between 1 and 5")
     private Integer empEnvironmentSatisfaction;
 
-    private String maritalStatus;
+    private MaritalStatus maritalStatus;
     private String empJobRole;
-    private String businessTravelFrequency;
+    private TravelFrequency businessTravelFrequency;
 
     @PositiveOrZero(message = "distanceFromHome must be >= 0")
     private Integer distanceFromHome;
@@ -92,8 +90,8 @@ public class EmployeeCreateRequest {
 
     private Boolean attrition;
 
-    @Min(value = 1, message = "performanceRating must be between 1 and 5")
-    @Max(value = 5, message = "performanceRating must be between 1 and 5")
+    @Min(value = 0, message = "performanceRating must be between 0 and 2")
+    @Max(value = 2, message = "performanceRating must be between 0 and 2")
     private Integer performanceRating;
 
 }

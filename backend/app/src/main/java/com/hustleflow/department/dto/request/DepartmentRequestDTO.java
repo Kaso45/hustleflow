@@ -20,6 +20,5 @@ public class DepartmentRequestDTO {
 
     private String description;
 
-    @NotNull
     private Long managerId;
 }

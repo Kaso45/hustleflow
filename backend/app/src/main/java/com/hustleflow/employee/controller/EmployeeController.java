@@ -2,6 +2,7 @@ package com.hustleflow.employee.controller;
 
 import com.hustleflow.employee.dto.EmployeeCreateRequest;
 import com.hustleflow.employee.dto.EmployeeResponse;
+import com.hustleflow.employee.dto.EmployeeUpdateRequest;
 import com.hustleflow.employee.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -35,7 +36,7 @@ public class EmployeeController {
 
     @PutMapping("/{employeeId}")
     public ResponseEntity<EmployeeResponse> updateEmployee(@PathVariable Long employeeId,
-            @RequestBody EmployeeCreateRequest request) {
+            @RequestBody EmployeeUpdateRequest request) {
         EmployeeResponse response = employeeService.updateEmployee(employeeId, request);
         return ResponseEntity.ok(response);
     }

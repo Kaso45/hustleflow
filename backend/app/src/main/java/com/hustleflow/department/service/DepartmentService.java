@@ -37,7 +37,12 @@ public class DepartmentService {
     }
 
     public String createDepartment(DepartmentRequestDTO request) {
-        Employee manager = employeeRepository.findById(request.getManagerId()).orElse(null);
+        Long managerId = request.getManagerId();
+        Employee manager = null;
+        if (managerId != null) {
+            manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new RuntimeException("Manager doesn't exist: " + managerId));
+        }
         Optional<Department> existing = departmentRepository.findByDepartmentName(request.getDepartmentName());
         existing.ifPresent(obj -> {
             throw new RuntimeException("Department already exists: " + obj.getDepartmentName());
@@ -58,8 +63,12 @@ public class DepartmentService {
     }
 
     public String updateDepartment(Long id, DepartmentRequestDTO request) {
-        Employee manager = employeeRepository.findById(request.getManagerId())
-                .orElseThrow(() -> new RuntimeException("Manager doesn't exist: " + request.getManagerId()));
+        Long managerId = request.getManagerId();
+        Employee manager = null;
+        if (managerId != null) {
+            manager = employeeRepository.findById(managerId)
+                    .orElseThrow(() -> new RuntimeException("Manager doesn't exist: " + managerId));
+        }
         Department existing = departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department doesn't exist: " + id));
 
