@@ -5,6 +5,7 @@ import com.hustleflow.department.repository.DepartmentRepository;
 import com.hustleflow.employee.domain.Employee;
 import com.hustleflow.employee.dto.EmployeeCreateRequest;
 import com.hustleflow.employee.dto.EmployeeResponse;
+import com.hustleflow.employee.dto.EmployeeUpdateRequest;
 import com.hustleflow.employee.repository.EmployeeRepository;
 import com.hustleflow.exception.ResourceNotFoundException;
 
@@ -39,7 +40,6 @@ public class EmployeeService {
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
         employee.setEducationBackground(request.getEducationBackground());
-        employee.setPerformanceScore(request.getPerformanceScore());
         employee.setOverTime(request.getOverTime());
         employee.setNumCompaniesWorked(request.getNumCompaniesWorked());
         employee.setEmpJobLevel(request.getEmpJobLevel());
@@ -87,7 +87,7 @@ public class EmployeeService {
     }
 
     @Transactional
-    public EmployeeResponse updateEmployee(Long employeeId, EmployeeCreateRequest request) {
+    public EmployeeResponse updateEmployee(Long employeeId, EmployeeUpdateRequest request) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee not found with id: " + employeeId));
 
@@ -105,7 +105,6 @@ public class EmployeeService {
         employee.setGender(request.getGender());
         employee.setAge(request.getAge());
         employee.setEducationBackground(request.getEducationBackground());
-        employee.setPerformanceScore(request.getPerformanceScore());
         employee.setOverTime(request.getOverTime());
         employee.setNumCompaniesWorked(request.getNumCompaniesWorked());
         employee.setEmpJobLevel(request.getEmpJobLevel());
@@ -153,7 +152,6 @@ public class EmployeeService {
         response.setGender(employee.getGender());
         response.setAge(employee.getAge());
         response.setEducationBackground(employee.getEducationBackground());
-        response.setPerformanceScore(employee.getPerformanceScore());
         response.setOverTime(employee.getOverTime());
         response.setNumCompaniesWorked(employee.getNumCompaniesWorked());
         response.setEmpJobLevel(employee.getEmpJobLevel());
@@ -161,9 +159,10 @@ public class EmployeeService {
         response.setEmpHourlyRate(employee.getEmpHourlyRate());
         response.setEmpJobSatisfaction(employee.getEmpJobSatisfaction());
         response.setEmpEnvironmentSatisfaction(employee.getEmpEnvironmentSatisfaction());
-        response.setMaritalStatus(employee.getMaritalStatus());
+        response.setMaritalStatus(employee.getMaritalStatus() != null ? employee.getMaritalStatus().name() : null);
         response.setEmpJobRole(employee.getEmpJobRole());
-        response.setBusinessTravelFrequency(employee.getBusinessTravelFrequency());
+        response.setBusinessTravelFrequency(
+                employee.getBusinessTravelFrequency() != null ? employee.getBusinessTravelFrequency().name() : null);
         response.setDistanceFromHome(employee.getDistanceFromHome());
         response.setEmpEducationLevel(employee.getEmpEducationLevel());
         response.setEmpLastSalaryHikePercent(employee.getEmpLastSalaryHikePercent());

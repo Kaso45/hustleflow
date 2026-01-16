@@ -1,6 +1,8 @@
 package com.hustleflow.employee.domain;
 
 import com.hustleflow.department.domain.Department;
+import com.hustleflow.employee.enums.MaritalStatus;
+import com.hustleflow.employee.enums.TravelFrequency;
 
 import jakarta.persistence.*;
 
@@ -37,9 +39,6 @@ public class Employee {
     @Column(name = "education_background")
     private String educationBackground;
 
-    @Column(name = "performance_score")
-    private Integer performanceScore;
-
     @Column(name = "overtime")
     private Boolean overTime;
 
@@ -62,13 +61,15 @@ public class Employee {
     private Integer empEnvironmentSatisfaction;
 
     @Column(name = "marital_status")
-    private String maritalStatus;
+    @Enumerated(EnumType.STRING)
+    private MaritalStatus maritalStatus;
 
     @Column(name = "emp_job_role")
     private String empJobRole;
 
     @Column(name = "business_travel_frequency")
-    private String businessTravelFrequency;
+    @Enumerated(EnumType.STRING)
+    private TravelFrequency businessTravelFrequency;
 
     @Column(name = "distance_from_home")
     private Integer distanceFromHome;

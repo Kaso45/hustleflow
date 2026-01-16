@@ -12,7 +12,6 @@ public class EmployeeResponse {
     private String gender;
     private Integer age;
     private String educationBackground;
-    private Integer performanceScore;
     private Boolean overTime;
     private Integer numCompaniesWorked;
     private Integer empJobLevel;
