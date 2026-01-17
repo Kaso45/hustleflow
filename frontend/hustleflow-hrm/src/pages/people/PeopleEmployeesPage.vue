@@ -62,34 +62,50 @@
         v-else
         v-for="emp in filteredEmployees"
         :key="emp.id"
-        class="row-card"
+        class="row-card is-clickable"
         :style="{ gridTemplateColumns: '3fr 1.5fr 1.5fr 1.2fr 1fr 100px' }"
       >
         <!-- Columns -->
         <div class="col-info">
           <BaseAvatar :name="emp.name" :size="40" />
           <div class="info-text">
-            <div class="emp-name">{{ emp.name }}</div>
-            <div class="emp-email">{{ generateEmail(emp.name) }}</div>
+            <div class="info-card-name">{{ emp.name }}</div>
+            <div class="info-card-meta">{{ generateEmail(emp.name) }}</div>
           </div>
         </div>
 
-        <div>
-          <span class="dept-badge" :class="getDeptClass(emp.empDepartment)">{{
-            emp.empDepartment
-          }}</span>
+        <div class="info-pill-stack">
+          <span
+            v-for="(token, index) in tokenizeDepartment(emp.empDepartment)"
+            :key="index"
+            class="info-pill is-muted"
+          >
+            {{ token }}
+          </span>
         </div>
 
-        <div>
-          <div class="role-title">{{ emp.empJobRole }}</div>
-          <div class="role-level">Level {{ emp.empJobLevel }}</div>
+        <div class="info-stack">
+          <span class="info-label">Role</span>
+          <span class="info-value">{{ emp.empJobRole }}</span>
+          <span class="info-card-meta">Level {{ emp.empJobLevel }}</span>
         </div>
 
-        <div class="pr-4">
-          <div class="role-level">{{ ratingLabel(emp.performanceRating) }}</div>
+        <div class="info-stack">
+          <span class="info-label">Rating</span>
+          <span
+            class="info-value"
+            :class="ratingToneClass(emp.performanceRating)"
+          >
+            {{ ratingLabel(emp.performanceRating) }}
+          </span>
         </div>
 
-        <div>{{ emp.overTime ? "Yes" : "No" }}</div>
+        <div class="info-stack">
+          <span class="info-label">Overtime</span>
+          <span class="info-value" :class="{ 'info-accent': emp.overTime }">
+            {{ emp.overTime ? "Yes" : "No" }}
+          </span>
+        </div>
 
         <!-- ACTIONS: Dùng Lucide Icons -->
         <div class="actions-group">
@@ -569,16 +585,9 @@ const filteredEmployees = computed(() => {
 
 const generateEmail = (name) =>
   name ? `${name.toLowerCase().replace(/\s/g, ".")}@hustleflow.com` : "";
-const getDeptClass = (deptName) => {
-  const map = {
-    Sales: "badge-blue",
-    HR: "badge-purple",
-    Engineering: "badge-green",
-    Finance: "badge-orange",
-    Marketing: "badge-pink",
-  };
-  return map[deptName] || "badge-gray";
-};
+
+const tokenizeDepartment = (deptName) =>
+  (deptName || "").split(/\s+/).filter(Boolean);
 
 const ratingLabel = (val) => {
   if (val === null || val === undefined || val === "") return "—";
@@ -595,268 +604,41 @@ const ratingLabel = (val) => {
   }
 };
 
+const ratingToneClass = (val) => {
+  const label = ratingLabel(val);
+  if (label === "High") return "rating-high";
+  if (label === "Medium") return "rating-medium";
+  if (label === "Low") return "rating-low";
+  return "rating-neutral";
+};
+
 onMounted(() => {
   fetchData();
 });
 </script>
 
 <style scoped>
-/* Page Styles */
-.page-container {
-  padding: 24px;
-  background-color: #f3f7f9;
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  color: #0b2433;
-}
-
-/* Stats & Filter styles reuse... */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-}
-.glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 0.5px solid rgba(15, 118, 110, 0.12);
-  box-shadow: 0 6px 18px rgba(10, 20, 36, 0.06);
-  border-radius: 18px;
-  padding: 20px 24px;
-}
-.stat-label {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0b2433;
-}
-.text-small {
-  font-size: 14px;
-  color: #94a3b8;
-  font-weight: 500;
-}
-
-.filter-section {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-.filter-pill {
-  border: none;
-  background: transparent;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.filter-pill:hover {
-  background: rgba(95, 209, 197, 0.1);
+.rating-high {
   color: #0f766e;
 }
-.filter-pill.active {
-  background: #fff;
-  color: #0b2433;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+.rating-medium {
+  color: #eab308;
 }
 
-/* Row Card */
-.row-card {
-  display: grid;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 6px rgba(10, 20, 36, 0.04);
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  gap: 10px;
-}
-.row-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(10, 20, 36, 0.08);
-  border-color: rgba(95, 209, 197, 0.3);
+.rating-low {
+  color: #e11d48;
 }
 
-/* Column Helpers */
-.col-info {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  overflow: hidden;
-}
-.info-text {
-  overflow: hidden;
-}
-.emp-name {
-  font-weight: 600;
-  font-size: 15px;
-  color: #0b2433;
-}
-.emp-email {
-  font-size: 12px;
+.rating-neutral {
   color: #94a3b8;
-}
-.dept-badge {
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-}
-.badge-blue {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-.badge-purple {
-  background: #f3e8ff;
-  color: #9333ea;
-}
-.badge-green {
-  background: #dcfce7;
-  color: #16a34a;
-}
-.badge-orange {
-  background: #ffedd5;
-  color: #ea580c;
-}
-.badge-gray {
-  background: #f1f5f9;
-  color: #475569;
-}
-.badge-pink {
-  background: #fce7f3;
-  color: #be185d;
-}
-.role-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #334155;
-}
-.role-level {
-  font-size: 11px;
-  color: #94a3b8;
-  margin-top: 2px;
 }
 
 /* Actions */
-.actions-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.icon-btn.edit:hover {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-.icon-btn.delete:hover {
-  background: #fee2e2;
-  color: #ef4444;
-}
-.text-right {
-  text-align: right;
-}
-.state-msg {
-  text-align: center;
-  padding: 40px;
-  color: #94a3b8;
-  font-style: italic;
-}
-
-/* FORM STYLES */
 .modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
   max-height: 70vh;
   overflow-y: auto;
   padding-right: 8px; /* space for scrollbar */
-}
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-.form-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-}
-.form-group input,
-.form-group select {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
-  color: #0f172a;
-  transition: all 0.2s;
-  background: #f8fafc;
-}
-.form-group input:focus,
-.form-group select:focus {
-  background: #fff;
-  border-color: #5fd1c5;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(95, 209, 197, 0.15);
-}
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
-}
-.btn-cancel {
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  border: 1px solid transparent;
-  cursor: pointer;
-}
-.btn-cancel:hover {
-  background: #f1f5f9;
-}
-.btn-submit {
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  color: white;
-  background: #5fd1c5;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(95, 209, 197, 0.3);
 }
 .btn-submit:hover {
   background: #4bc2b6;

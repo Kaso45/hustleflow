@@ -16,7 +16,13 @@ export const getDepartments = async () => {
     return { data: mockDepartments };
   }
   // API thật: GET /api/departments
-  return apiClient.get('/departments');
+  try {
+    const res = await apiClient.get('/departments');
+    if (Array.isArray(res?.data) && res.data.length > 0) return res;
+    return { data: mockDepartments };
+  } catch (e) {
+    return { data: mockDepartments };
+  }
 };
 
 export const createDepartment = async (data) => {

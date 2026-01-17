@@ -53,23 +53,27 @@
               <div class="col-info">
                 <BaseAvatar :name="emp.name" :size="40" />
                 <div class="info-text">
-                  <div class="emp-name">{{ emp.name }}</div>
-                  <div class="emp-meta">
+                  <div class="info-card-name">{{ emp.name }}</div>
+                  <div class="info-card-meta">
                     {{ emp.empJobRole || "—" }} • Level
                     {{ emp.empJobLevel ?? "—" }}
                   </div>
                 </div>
               </div>
-              <div>
-                <span class="dept-badge">{{
-                  emp.empDepartment?.departmentName || emp.empDepartment || "—"
-                }}</span>
+              <div class="info-pill-stack">
+                <span
+                  v-for="token in deptTokens(emp)"
+                  :key="token"
+                  class="info-pill is-muted"
+                >
+                  {{ token }}
+                </span>
               </div>
-              <div>
-                <div class="role-title small">Job role</div>
-                <div class="role-level small">
-                  {{ emp.empJobRole || "Not set" }}
-                </div>
+              <div class="info-stack">
+                <span class="info-label">Job role</span>
+                <span class="info-value">{{
+                  emp.empJobRole || "Not set"
+                }}</span>
               </div>
               <div class="actions-group">
                 <button
@@ -233,6 +237,11 @@ const filteredEmployees = computed(() => {
     e.name?.toLowerCase().includes(searchQuery.value.toLowerCase())
   );
 });
+
+const deptTokens = (emp) => {
+  const src = emp.empDepartment?.departmentName || emp.empDepartment || "—";
+  return src.split(/\s+/).filter(Boolean);
+};
 
 // Review action per employee
 const reviewLoading = ref({});
@@ -439,72 +448,7 @@ const scoreClass = (score) => {
   font-weight: 600;
 }
 
-/* Floating rows table */
-.row-card {
-  display: grid;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 6px rgba(10, 20, 36, 0.04);
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  gap: 10px;
-}
-.row-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(10, 20, 36, 0.08);
-  border-color: rgba(95, 209, 197, 0.3);
-}
-.col-info {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  overflow: hidden;
-}
-.info-text {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-.emp-name {
-  font-weight: 700;
-  color: #0b2433;
-}
-.emp-meta {
-  color: #94a3b8;
-  font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.dept-badge {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
-}
-
-.role-title {
-  font-size: 11px;
-  color: #94a3b8;
-  text-transform: uppercase;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-.role-level {
-  font-weight: 600;
-  color: #0b2433;
-}
-.small {
-  font-size: 12px;
-}
-
+/* Row actions */
 .actions-group {
   display: flex;
   justify-content: flex-end;

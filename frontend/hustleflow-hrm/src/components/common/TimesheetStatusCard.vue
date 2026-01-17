@@ -1,9 +1,9 @@
 <template>
   <div class="ts-card">
     <div class="top">
-      <BaseAvatar :name="employee?.employeeName" :size="56" />
+      <BaseAvatar :name="employee?.name" :size="56" />
       <div>
-        <h3>{{ employee?.employeeName || "No employee selected" }}</h3>
+        <h3>{{ employee?.name || "No employee selected" }}</h3>
         <p>{{ nowTime }}</p>
       </div>
     </div>
@@ -26,7 +26,9 @@
 
       <div class="stat">
         <label>Status</label>
-        <div class="badge" :class="today?.status">{{ today?.status || "--" }}</div>
+        <div class="badge" :class="today?.status">
+          {{ today?.status || "--" }}
+        </div>
       </div>
     </div>
   </div>
@@ -38,7 +40,7 @@ import BaseAvatar from "./BaseAvatar.vue";
 
 const props = defineProps({
   employee: Object,
-  today: Object
+  today: Object,
 });
 
 const nowTime = ref("");
@@ -93,7 +95,26 @@ onMounted(() => {
   text-align: center;
 }
 
-.badge.ON_TIME { background: var(--accent-mint); color:#0f8a5f; }
-.badge.LATE { background:#FFE0E4; color:#c44562; }
-.badge.ABSENT { background:#FFE0E4; color:#c44562; }
+.badge.ON_TIME {
+  background: var(--accent-mint);
+  color: #0f8a5f;
+}
+.badge.LATE {
+  background: #ffe0e4;
+  color: #c44562;
+}
+.badge.ABSENT {
+  background: #ffe0e4;
+  color: #c44562;
+}
+
+@media (max-width: 768px) {
+  .ts-card {
+    padding: 16px;
+  }
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
 </style>
