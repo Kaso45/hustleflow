@@ -4,7 +4,6 @@ import com.hustleflow.payroll.dto.CreatePayrollRequest;
 import com.hustleflow.payroll.dto.GeneratePayrollRequest;
 import com.hustleflow.payroll.dto.PayrollResponse;
 import com.hustleflow.payroll.dto.UpdatePayrollRequest;
-import com.hustleflow.payroll.enums.PayrollStatus;
 import com.hustleflow.payroll.service.PayrollService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
