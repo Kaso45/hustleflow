@@ -118,11 +118,13 @@ public class TimesheetService {
     }
 
     private TimesheetReponse mapToResponse(Timesheet timesheet) {
+        String checkIn = timesheet.getCheckIn() != null ? timesheet.getCheckIn().toString() : null;
+        String checkOut = timesheet.getCheckOut() != null ? timesheet.getCheckOut().toString() : null;
         TimesheetReponse res = TimesheetReponse.builder()
                 .employeeId(timesheet.getEmployee().getId())
                 .date(timesheet.getDate().toLocalDate().toString())
-                .checkIn(timesheet.getCheckIn().toString())
-                .checkOut(timesheet.getCheckOut().toString())
+                .checkIn(checkIn)
+                .checkOut(checkOut)
                 .totalHours(timesheet.getTotalHours())
                 .status(timesheet.getStatus())
                 .build();
