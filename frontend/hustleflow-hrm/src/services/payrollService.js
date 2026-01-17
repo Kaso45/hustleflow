@@ -7,7 +7,7 @@ let mockPayrolls = [];
 // Hàm tạo dữ liệu giả: Sinh ra bảng lương cho 12 tháng của năm hiện tại
 const seedMockData = () => {
   if (mockPayrolls.length > 0) return;
-  
+
   const currentYear = new Date().getFullYear();
 
   // Tạo dữ liệu cho 12 tháng
@@ -16,15 +16,15 @@ const seedMockData = () => {
     for (let empId = 1; empId <= 15; empId++) {
       // Logic random lương để trông thật hơn
       // Lương cơ bản dao động tùy cấp bậc (ID càng cao lương càng cao giả định)
-      const baseSalary = 10000000 + (empId * 1500000); 
-      
+      const baseSalary = 10000000 + (empId * 1500000);
+
       // Thưởng ngẫu nhiên cho một số người, một số tháng
       const hasBonus = Math.random() > 0.6;
       const bonus = hasBonus ? Math.floor(Math.random() * 5000000) : 0;
-      
+
       // Phạt đi muộn (random ít thôi)
       const deduction = Math.random() > 0.8 ? 200000 : 0;
-      
+
       // Trạng thái: Các tháng cũ (1 -> tháng hiện tại -1) thì PAID, tháng này thì Random, tháng sau thì chưa có
       let status = 'UNPAID';
       const thisMonth = new Date().getMonth() + 1;
@@ -41,7 +41,7 @@ const seedMockData = () => {
         deduction: deduction,
         netSalary: baseSalary + bonus - deduction,
         status: status,
-        paymentDate: status === 'PAID' ? `${currentYear}-${String(month).padStart(2,'0')}-28` : null
+        paymentDate: status === 'PAID' ? `${currentYear}-${String(month).padStart(2, '0')}-28` : null
       });
     }
   }
@@ -52,18 +52,28 @@ seedMockData();
 // --- API METHODS ---
 
 export const getPayrolls = async (params = {}) => {
+  const sanitized = { ...params };
+  if (sanitized.status !== undefined && sanitized.status !== null) {
+    const s = String(sanitized.status).trim();
+    if (!s || s.toLowerCase() === 'all') {
+      delete sanitized.status;
+    } else {
+      sanitized.status = s.toUpperCase();
+    }
+  }
+
   if (USE_MOCK_API) {
     await new Promise(r => setTimeout(r, 200)); // Delay nhẹ tạo cảm giác load
-    
+
     // Logic filter giả lập (Lưu ý: Dept filter sẽ làm ở Frontend Page vì bảng này chỉ có empId)
     let result = [...mockPayrolls];
-    if (params.month) result = result.filter(p => p.month === parseInt(params.month));
-    if (params.year) result = result.filter(p => p.year === parseInt(params.year));
-    if (params.status && params.status !== 'All') result = result.filter(p => p.status === params.status);
-    
+    if (sanitized.month) result = result.filter(p => p.month === parseInt(sanitized.month));
+    if (sanitized.year) result = result.filter(p => p.year === parseInt(sanitized.year));
+    if (sanitized.status) result = result.filter(p => p.status === sanitized.status);
+
     return { data: result };
   }
-  return apiClient.get('/payrolls', { params });
+  return apiClient.get('/payrolls', { params: sanitized });
 };
 
 // API Generate (Backend tính toán)
@@ -76,6 +86,23 @@ export const generatePayroll = async (data) => {
   return apiClient.post('/payrolls/generate', data);
 };
 
+// Create single payroll (POST /payrolls)
+export const createPayroll = async (data) => {
+  if (USE_MOCK_API) {
+    await new Promise(r => setTimeout(r, 300));
+    const net = Number(data.baseSalary || 0) + Number(data.bonus || 0) - Number(data.deduction || 0);
+    const created = {
+      id: Date.now(),
+      generatedAt: new Date().toISOString(),
+      netSalary: net,
+      ...data,
+    };
+    mockPayrolls.unshift(created);
+    return { data: created };
+  }
+  return apiClient.post('/payrolls', data);
+};
+
 export const updatePayroll = async (id, data) => {
   if (USE_MOCK_API) {
     await new Promise(r => setTimeout(r, 300));
@@ -85,7 +112,7 @@ export const updatePayroll = async (id, data) => {
       const updated = { ...mockPayrolls[index], ...data };
       // Recalculate Net Salary
       updated.netSalary = Number(updated.baseSalary) + Number(updated.bonus || 0) - Number(updated.deduction || 0);
-      
+
       mockPayrolls[index] = updated;
       return { data: mockPayrolls[index] };
     }

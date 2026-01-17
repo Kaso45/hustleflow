@@ -43,29 +43,36 @@
         class="row-card"
         :style="{ gridTemplateColumns: '2fr 1fr 2fr 3fr 100px' }"
       >
-        <div class="font-bold text-[#0b2433]">{{ dept.departmentName }}</div>
-        <div>
-          <span class="code-badge">{{ dept.code }}</span>
+        <div class="info-stack">
+          <span class="info-label">Department</span>
+          <span class="info-card-name">{{ dept.departmentName }}</span>
+          <span class="info-card-meta">ID: #{{ dept.id }}</span>
         </div>
 
-        <div class="col-manager">
-          <div
-            v-if="getManager(dept.managerId)"
-            class="flex items-center gap-3"
-          >
+        <div class="info-pill-stack">
+          <span class="info-pill code-pill">{{ dept.code }}</span>
+        </div>
+
+        <div class="col-info manager-cell">
+          <template v-if="getManager(dept.managerId)">
             <BaseAvatar :name="getManager(dept.managerId).name" :size="32" />
-            <div class="text-sm font-medium text-gray-700 truncate">
-              {{ getManager(dept.managerId).name }}
+            <div class="info-text">
+              <span class="info-card-name">{{
+                getManager(dept.managerId).name
+              }}</span>
+              <span class="info-card-meta">Manager</span>
             </div>
-          </div>
-          <span v-else class="text-xs text-gray-400 italic">Unassigned</span>
+          </template>
+          <span v-else class="info-card-meta italic text-gray-400"
+            >Unassigned</span
+          >
         </div>
 
-        <div
-          class="text-sm text-gray-500 truncate pr-4"
-          :title="dept.description"
-        >
-          {{ dept.description || "--" }}
+        <div class="info-stack description-cell" :title="dept.description">
+          <span class="info-label">Description</span>
+          <span class="info-value truncate">{{
+            dept.description || "--"
+          }}</span>
         </div>
 
         <div class="actions-group">
@@ -294,176 +301,20 @@ onMounted(() => {
 });
 </script>
 <style scoped>
-/* GIỮ NGUYÊN TOÀN BỘ CSS CỦA BẠN */
-.page-container {
-  padding: 24px;
-  background-color: #f3f7f9;
-  min-height: 100vh;
-  font-family: "Inter", sans-serif;
-  color: #0b2433;
+.code-pill {
+  font-family: "Space Mono", "Roboto Mono", monospace;
+  letter-spacing: 0.08em;
 }
-.stats-grid {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 32px;
+
+.manager-cell {
+  min-width: 0;
 }
-.glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 0.5px solid rgba(15, 118, 110, 0.12);
-  box-shadow: 0 6px 18px rgba(10, 20, 36, 0.06);
-  border-radius: 18px;
-  padding: 20px 24px;
-  min-width: 200px;
+
+.description-cell {
+  min-width: 0;
 }
-.stat-label {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  color: #94a3b8;
-  margin-bottom: 8px;
-}
-.stat-value {
-  font-size: 32px;
-  font-weight: 700;
-  color: #0b2433;
-}
-.row-card {
-  display: grid;
-  align-items: center;
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 2px 6px rgba(10, 20, 36, 0.04);
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  gap: 10px;
-}
-.row-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(10, 20, 36, 0.08);
-  border-color: rgba(95, 209, 197, 0.3);
-}
-.code-badge {
-  background: #f1f5f9;
-  color: #475569;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 600;
-  border: 1px solid #e2e8f0;
-}
-.col-manager {
-  display: flex;
-  align-items: center;
-}
-.actions-group {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-.icon-btn {
-  width: 32px;
-  height: 32px;
-  min-width: 32px;
-  flex-shrink: 0;
-  border-radius: 8px;
-  border: none;
-  background: transparent;
-  color: #94a3b8;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.icon-btn.edit:hover {
-  background: #e0f2fe;
-  color: #0284c7;
-}
-.icon-btn.delete:hover {
-  background: #fee2e2;
-  color: #ef4444;
-}
-.text-right {
-  text-align: right;
-}
-.state-msg {
-  text-align: center;
-  padding: 40px;
-  color: #94a3b8;
-  font-style: italic;
-}
-.modal-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.form-row {
-  display: flex;
-  gap: 16px;
-}
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-}
-.form-group label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-}
-.form-group input,
-.form-group select,
-.form-group textarea {
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #e2e8f0;
-  font-size: 14px;
-  color: #0f172a;
-  transition: all 0.2s;
-  background: #f8fafc;
-  width: 100%;
-}
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  background: #fff;
-  border-color: #5fd1c5;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(95, 209, 197, 0.15);
-}
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
-}
-.btn-cancel {
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  color: #64748b;
-  background: transparent;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-.btn-cancel:hover {
-  background: #f1f5f9;
-}
-.btn-submit {
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-  color: white;
-  background: #5fd1c5;
-  border: none;
-  cursor: pointer;
-  box-shadow: 0 4px 12px rgba(95, 209, 197, 0.3);
-}
-.btn-submit:hover {
-  background: #4bc2b6;
+
+.description-cell .truncate {
+  display: block;
 }
 </style>

@@ -3,11 +3,13 @@ package com.hustleflow.payroll.controller;
 import com.hustleflow.payroll.dto.CreatePayrollRequest;
 import com.hustleflow.payroll.dto.GeneratePayrollRequest;
 import com.hustleflow.payroll.dto.PayrollResponse;
-import com.hustleflow.payroll.enums.PayrollStatus;
+import com.hustleflow.payroll.dto.UpdatePayrollRequest;
 import com.hustleflow.payroll.service.PayrollService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,7 +30,7 @@ public class PayrollController {
     public ResponseEntity<List<PayrollResponse>> getPayrolls(
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) PayrollStatus status) {
+            @RequestParam(required = false) String status) {
         return ResponseEntity.ok(payrollService.getPayrolls(month, year, status));
     }
 
@@ -37,11 +39,18 @@ public class PayrollController {
     public ResponseEntity<PayrollResponse> createPayroll(@RequestBody CreatePayrollRequest request) {
         return ResponseEntity.ok(payrollService.createPayroll(request));
     }
-    
+
     // Generate payrolls: POST /api/payrolls/generate
     @PostMapping("/generate")
     public ResponseEntity<List<PayrollResponse>> generatePayrolls(@RequestBody GeneratePayrollRequest request) {
         return ResponseEntity.ok(payrollService.generatePayrolls(request));
     }
-}
 
+    // Update payroll: PUT /api/payrolls/{id}
+    @PutMapping("/{id}")
+    public ResponseEntity<PayrollResponse> updatePayroll(
+            @PathVariable Long id,
+            @RequestBody UpdatePayrollRequest request) {
+        return ResponseEntity.ok(payrollService.updatePayroll(id, request));
+    }
+}

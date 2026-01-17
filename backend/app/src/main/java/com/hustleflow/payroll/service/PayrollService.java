@@ -10,6 +10,7 @@ import com.hustleflow.payroll.domain.Payroll;
 import com.hustleflow.payroll.dto.CreatePayrollRequest;
 import com.hustleflow.payroll.dto.GeneratePayrollRequest;
 import com.hustleflow.payroll.dto.PayrollResponse;
+import com.hustleflow.payroll.dto.UpdatePayrollRequest;
 import com.hustleflow.payroll.enums.PayrollStatus;
 import com.hustleflow.payroll.repository.PayrollRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,19 +30,26 @@ public class PayrollService {
     private final ContractRepository contractRepository;
     private final DepartmentRepository departmentRepository;
 
-    public List<PayrollResponse> getPayrolls(Integer month, Integer year, PayrollStatus status) {
+    public List<PayrollResponse> getPayrolls(Integer month, Integer year, String status) {
+        PayrollStatus statusEnum = null;
+        if (status != null && !status.isBlank() && !"ALL".equalsIgnoreCase(status)) {
+            try {
+                statusEnum = PayrollStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Invalid payroll status: " + status);
+            }
+        }
+        boolean hasMonthYear = month != null && year != null;
         List<Payroll> payrolls;
-
-        if (month != null && year != null && status != null) {
-            payrolls = payrollRepository.findByMonthAndYearAndStatus(month, year, status);
-        } else if (month != null && year != null) {
+        if (hasMonthYear && statusEnum != null) {
+            payrolls = payrollRepository.findByMonthAndYearAndStatus(month, year, statusEnum);
+        } else if (hasMonthYear) {
             payrolls = payrollRepository.findByMonthAndYear(month, year);
-        } else if (status != null) {
-            payrolls = payrollRepository.findByStatus(status);
+        } else if (statusEnum != null) {
+            payrolls = payrollRepository.findByStatus(statusEnum);
         } else {
             payrolls = payrollRepository.findAll();
         }
-
         return payrolls.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -95,19 +103,19 @@ public class PayrollService {
         }
 
         return employees.stream()
-                .map(employee -> generatePayrollForEmployee(employee, request.getMonth(), request.getYear()))
+                .map(employee -> generatePayrollForEmployee(employee, request))
                 .collect(Collectors.toList());
     }
 
-    private PayrollResponse generatePayrollForEmployee(Employee employee, int month, int year) {
+    private PayrollResponse generatePayrollForEmployee(Employee employee, GeneratePayrollRequest request) {
         // Check if payroll already exists for this employee, month, and year
         List<Payroll> existingPayrolls = payrollRepository.findByEmployeeId(employee.getId());
         boolean exists = existingPayrolls.stream()
-                .anyMatch(p -> p.getMonth() == month && p.getYear() == year);
+                .anyMatch(p -> p.getMonth() == request.getMonth() && p.getYear() == request.getYear());
 
         if (exists) {
             Payroll existing = existingPayrolls.stream()
-                    .filter(p -> p.getMonth() == month && p.getYear() == year)
+                    .filter(p -> p.getMonth() == request.getMonth() && p.getYear() == request.getYear())
                     .findFirst()
                     .orElseThrow();
             return mapToResponse(existing);
@@ -124,17 +132,20 @@ public class PayrollService {
         Payroll payroll = new Payroll();
         payroll.setEmployee(employee);
         payroll.setDepartment(employee.getEmpDepartment()); // Map empDepartment to departmentCode
-        payroll.setMonth(month);
-        payroll.setYear(year);
+        payroll.setMonth(request.getMonth());
+        payroll.setYear(request.getYear());
 
-        if (activeContract != null) {
+        // Apply overrides if provided; otherwise fallback to contract or zero
+        if (request.getBaseSalary() != null) {
+            payroll.setBaseSalary(request.getBaseSalary());
+        } else if (activeContract != null) {
             payroll.setBaseSalary(activeContract.getBaseSalary());
         } else {
             payroll.setBaseSalary(BigDecimal.ZERO);
         }
 
-        payroll.setBonus(BigDecimal.ZERO);
-        payroll.setDeduction(BigDecimal.ZERO);
+        payroll.setBonus(request.getBonus() != null ? request.getBonus() : BigDecimal.ZERO);
+        payroll.setDeduction(request.getDeduction() != null ? request.getDeduction() : BigDecimal.ZERO);
 
         // Calculate net salary
         BigDecimal netSalary = payroll.getBaseSalary()
@@ -146,6 +157,28 @@ public class PayrollService {
 
         Payroll savedPayroll = payrollRepository.save(payroll);
         return mapToResponse(savedPayroll);
+    }
+
+    public PayrollResponse updatePayroll(Long id, UpdatePayrollRequest request) {
+        Payroll payroll = payrollRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Payroll not found: " + id));
+
+        if (request.getBaseSalary() != null)
+            payroll.setBaseSalary(request.getBaseSalary());
+        if (request.getBonus() != null)
+            payroll.setBonus(request.getBonus());
+        if (request.getDeduction() != null)
+            payroll.setDeduction(request.getDeduction());
+        if (request.getStatus() != null)
+            payroll.setStatus(request.getStatus());
+
+        BigDecimal netSalary = payroll.getBaseSalary()
+                .add(payroll.getBonus() != null ? payroll.getBonus() : BigDecimal.ZERO)
+                .subtract(payroll.getDeduction() != null ? payroll.getDeduction() : BigDecimal.ZERO);
+        payroll.setNetSalary(netSalary);
+
+        Payroll saved = payrollRepository.save(payroll);
+        return mapToResponse(saved);
     }
 
     private PayrollResponse mapToResponse(Payroll payroll) {
