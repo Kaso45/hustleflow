@@ -1,28 +1,27 @@
 import apiClient from './apiClient';
 import { USE_MOCK_API } from '@/config/appConfig';
 
+const mockDisabledError = () =>
+  Promise.reject(new Error('Mock timesheet API has been disabled. Please connect to the backend.'));
+
 export const getTimesheets = async (employeeId, month, year) => {
-  if (USE_MOCK_API) {
-    await new Promise(r => setTimeout(r, 200));
-    return { data: [] };
-  }
-  // BẮT BUỘC gửi params vì Backend Java của bạn yêu cầu @RequestParam
+  if (USE_MOCK_API) return { data: [] };
   return apiClient.get('/timesheets', {
-    params: { 
-      employeeId: employeeId, 
-      month: month, 
-      year: year 
-    }
+    params: {
+      employeeId,
+      month,
+      year,
+    },
   });
 };
 
 export const clockIn = async (payload) => {
-  if (USE_MOCK_API) return { data: { ...payload, checkIn: '08:00', status: 'ON_TIME' } };
+  if (USE_MOCK_API) return mockDisabledError();
   return apiClient.post('/timesheets/clock-in', payload);
 };
 
 export const clockOut = async (payload) => {
-  if (USE_MOCK_API) return { data: true };
+  if (USE_MOCK_API) return mockDisabledError();
   return apiClient.patch('/timesheets/clock-out', payload);
 };
 
