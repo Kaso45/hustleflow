@@ -1,4 +1,14 @@
 services:
+  fastapi:
+    build:
+      context: ../ai-service
+      dockerfile: Dockerfile
+    container_name: hustleflow-fastapi
+    ports:
+      - "8000:8000"
+    networks:
+      - hustleflow-net
+
   be:
     build: ./app
     ports:
@@ -8,3 +18,10 @@ services:
       POSTGRES_DB_PROD: ${POSTGRES_DB_PROD}
       JWT_SECRET: ${JWT_SECRET}
       JWT_EXPIRATION: ${JWT_EXPIRATION}
+      ML_SERVICE_BASE_URL: ${ML_SERVICE_BASE_URL}
+    networks:
+      - hustleflow-net
+
+networks:
+  hustleflow-net:
+    driver: bridge
