@@ -3,6 +3,9 @@
 # =========================================
 ARG NODE_VERSION=24.12.0-alpine
 ARG NGINX_VERSION=alpine3.22
+ARG VITE_API_BASE_URL
+
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 
 # Use a lightweight Node.js image for building (customizable via ARG)
 FROM node:${NODE_VERSION} AS builder
@@ -15,8 +18,6 @@ COPY package.json package-lock.json* ./
 
 # Install project dependencies using npm ci (ensures a clean, reproducible install)
 RUN --mount=type=cache,target=/root/.npm npm ci
-
-COPY .env.production ./
 
 # Copy the rest of the application source code into the container
 COPY . .
